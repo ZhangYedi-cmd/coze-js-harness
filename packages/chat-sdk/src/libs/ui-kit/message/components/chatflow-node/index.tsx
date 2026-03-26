@@ -19,8 +19,8 @@ export interface ChatflowNodeData {
     name: string;
   }[];
   question_card_data?: {
-    Title: string;
-    Options: { name: string }[];
+    title: string;
+    options: { name: string }[];
   };
 }
 
@@ -98,10 +98,10 @@ const SwitchNode: FC<{
       })}
     >
       <Text className={styles['switch-node-text']}>
-        {data?.question_card_data?.Title}
+        {data?.question_card_data?.title}
       </Text>
       <Spacing vertical gap={6}>
-        {data?.question_card_data?.Options?.map((item, index) => (
+        {data?.question_card_data?.options?.map((item, index) => (
           <View
             className={styles['switch-node-switch-item']}
             key={index}
