@@ -1,0 +1,19 @@
+{
+  "extends": "@coze-infra/ts-config/tsconfig.node.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "tsBuildInfoFile": "dist/tsconfig.build.tsbuildinfo"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    {
+      "path": "../utils/fs-enhance/tsconfig.build.json"
+    },
+    {
+      "path": "../utils/rush-logger/tsconfig.build.json"
+    }
+  ]
+}

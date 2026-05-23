@@ -1,0 +1,10 @@
+lib/
+bin/
+dist/
+node_modules/
+*.tsbuildinfo
+*.log
+.DS_Store
+coverage/
+.vscode/
+.idea/

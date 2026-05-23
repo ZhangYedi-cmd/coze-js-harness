@@ -1,0 +1,61 @@
+{
+  "name": "@coze-arch/repo-lens",
+  "version": "0.0.1",
+  "private": false,
+  "description": "repo lens",
+  "license": "MIT",
+  "author": "coze-dev",
+  "maintainers": [],
+  "bin": {
+    "repo-lens": "bin/main"
+  },
+  "files": [
+    "lib",
+    "bin",
+    "README.md",
+    "!**/*.tsbuildinfo",
+    "!**/*.map"
+  ],
+  "scripts": {
+    "prebuild": "tsx scripts/prebuild.ts",
+    "build": "tsx scripts/build.ts",
+    "lint": "eslint ./ --cache",
+    "test": "vitest --run --passWithNoTests",
+    "test:all": "bash scripts/test-coverage.sh",
+    "test:cov": "vitest --run --passWithNoTests --coverage"
+  },
+  "dependencies": {
+    "@coze-infra/fs-enhance": "workspace:*",
+    "@coze-infra/rush-logger": "workspace:*",
+    "@rushstack/rush-sdk": "5.100.2",
+    "commander": "~12.1.0",
+    "debug": "^4.3.4",
+    "minimatch": "^10.0.0"
+  },
+  "devDependencies": {
+    "@coze-infra/eslint-config": "workspace:*",
+    "@coze-infra/ts-config": "workspace:*",
+    "@coze-infra/vitest-config": "workspace:*",
+    "@rollup/plugin-commonjs": "^28.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^12.0.0",
+    "@types/debug": "^4",
+    "@types/node": "^20",
+    "@vitest/coverage-v8": "~2.1.9",
+    "rollup": "^4.60.1",
+    "sucrase": "^3.32.0",
+    "tsx": "^4.19.2",
+    "vitest": "~2.1.9"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "cozePublishConfig": {
+    "bin": {
+      "repo-lens": "bin/main"
+    },
+    "main": "./lib/index.js",
+    "types": "./lib/index.d.ts"
+  }
+}

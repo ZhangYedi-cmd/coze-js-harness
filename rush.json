@@ -475,6 +475,10 @@
     {
       "packageName": "@coze/fact-check-extension",
       "projectFolder": "examples/fact-check-extension"
+    },
+    {
+      "packageName": "@coze-arch/repo-lens",
+      "projectFolder": "infra/repo-lens"
     }
   ]
 }

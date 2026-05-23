@@ -1,0 +1,104 @@
+name: Harness
+
+# Harness Engineering 自动化体系
+# 定时触发 AI 执行代码质量优化任务，产出 PR 供人工 review
+# 文档参考：.claude/harness/tasks.md
+
+on:
+  schedule:
+    # 每天 UTC 02:00 触发（北京时间 10:00）
+    # 调整频率时修改此 cron 表达式
+    - cron: '0 2 * * *'
+  # 支持在 GitHub Actions 页面手动触发（用于调试）
+  workflow_dispatch:
+
+jobs:
+  # ─── Job 1: 选取并执行一个优化任务，产出 PR ───────────────────────────────
+  harness-dispatcher:
+    name: Harness Dispatcher
+    runs-on: ubuntu-latest
+    # TODO: 配置 ANTHROPIC_API_KEY 后去掉此注释
+    # 前置条件：
+    #   1. 在仓库 Settings → Secrets and variables → Actions 中添加 ANTHROPIC_API_KEY
+    #   2. GITHUB_TOKEN 由 GitHub 自动注入，无需手动配置
+    permissions:
+      contents: write      # 创建分支、push 代码
+      pull-requests: write # 创建 PR
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # fetch-depth: 0 获取完整 git 历史，harness-dispatcher 需要用 git log 计算历史折扣
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.9.x'
+
+      - name: Cache Rush store
+        uses: actions/cache@v4
+        with:
+          path: |
+            common/temp/pnpm-local
+            common/temp/pnpm-store
+            common/temp/install-run
+          key: ${{ runner.os }}-rush-store-${{ hashFiles('common/config/subspaces/**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-rush-store-main
+            ${{ runner.os }}-rush-store
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev
+
+      - name: Install Rush dependencies
+        run: node common/scripts/install-run-rush.js install
+
+      - name: Install Claude Code CLI
+        # TODO: 确认 @anthropic-ai/claude-code 包名和版本后更新
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Config Git user
+        run: |
+          git config user.name "harness-bot"
+          git config user.email "harness-bot@users.noreply.github.com"
+
+      - name: Run harness-dispatcher
+        env:
+          # TODO: 在仓库 Secrets 中配置 ANTHROPIC_API_KEY
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # GITHUB_TOKEN 用于 git push 和 gh pr create（GitHub 自动注入，无需手动配置）
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: claude --dangerously-skip-permissions -p "/harness-dispatcher"
+
+  # ─── Job 2: Rebase 所有 open harness PR，保持随时可合入 ──────────────────
+  rebase-harness-prs:
+    name: Rebase Harness PRs
+    runs-on: ubuntu-latest
+    # 与 harness-dispatcher 并行运行，互不依赖
+    permissions:
+      contents: write      # git push rebase 后的分支
+      pull-requests: read  # 列出 open PR
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Config Git user
+        run: |
+          git config user.name "harness-bot"
+          git config user.email "harness-bot@users.noreply.github.com"
+
+      - name: Rebase open harness PRs
+        env:
+          # TODO: 在仓库 Secrets 中配置 ANTHROPIC_API_KEY
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: claude --dangerously-skip-permissions -p "/rebase-harness-prs"
