@@ -11,6 +11,11 @@ on:
     - cron: '0 2 * * *'
   # 支持在 GitHub Actions 页面手动触发（用于调试）
   workflow_dispatch:
+    inputs:
+      task:
+        description: '强制指定任务名（留空则按权重随机选）'
+        required: false
+        type: string
 
 jobs:
   # ─── Job 1: 选取并执行一个优化任务，产出 PR ───────────────────────────────
@@ -71,7 +76,14 @@ jobs:
           # GITHUB_TOKEN 用于 git push 和 gh pr create（GitHub 自动注入，无需手动配置）
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: claude --dangerously-skip-permissions -p "/harness-dispatcher"
+          # 手动触发时可强制指定任务，留空则随机
+          TASK_ARG: ${{ github.event.inputs.task }}
+        # --verbose 让 claude 把每一步（选任务、改文件、建 PR）打到 CI 日志，便于排查
+        run: |
+          ARGS="/harness-dispatcher"
+          if [ -n "$TASK_ARG" ]; then ARGS="$ARGS --task $TASK_ARG"; fi
+          echo "执行参数: $ARGS"
+          claude --dangerously-skip-permissions --verbose -p "$ARGS"
 
   # ─── Job 2: Rebase 所有 open harness PR，保持随时可合入 ──────────────────
   rebase-harness-prs:
