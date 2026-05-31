@@ -10,8 +10,7 @@ import {
   MAX_POLL_INTERVAL,
   POLL_INTERVAL,
 } from './constant';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const uni: any;
+declare const uni: { getRandomValues: Crypto['getRandomValues'] };
 
 const getCrypto = () => {
   if (isUniApp()) {
@@ -253,14 +252,13 @@ export const getDeviceToken = async (
       return deviceToken;
     } catch (error) {
       if (error instanceof APIError) {
+        const rawErr = error.rawError as { error?: string } | undefined;
         // If the error is authorization_pending, continue polling
-        if (
-          error?.rawError?.error === PKCEAuthErrorType.AUTHORIZATION_PENDING
-        ) {
+        if (rawErr?.error === PKCEAuthErrorType.AUTHORIZATION_PENDING) {
           await sleep(interval);
           continue;
           // If the error is slow_down, increase the interval
-        } else if (error?.rawError?.error === PKCEAuthErrorType.SLOW_DOWN) {
+        } else if (rawErr?.error === PKCEAuthErrorType.SLOW_DOWN) {
           if (interval < MAX_POLL_INTERVAL) {
             interval += POLL_INTERVAL;
           }
@@ -333,8 +331,7 @@ export const getJWTToken = async (
 
   // Prepare the payload for the JWT
   const now = Math.floor(Date.now() / 1000);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const payload: Record<string, any> = {
+  const payload: Record<string, string | number> = {
     iss: config.appId,
     aud: config.aud,
     iat: now,

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import fetch from 'node-fetch';
 import axios, {
   type AxiosResponseHeaders,
@@ -26,39 +24,52 @@ export interface FetchAPIOptions extends AxiosRequestConfig {
   isStreaming?: boolean;
 }
 
-const handleError = (error: any) => {
-  if (error.isAxiosError || (error.code && error.message)) {
+interface FetchError {
+  isAxiosError?: boolean;
+  code?: string;
+  message?: string;
+  response?: {
+    status?: number;
+    data?: ErrorRes;
+    headers?: AxiosResponseHeaders;
+  };
+}
+
+const handleError = (error: unknown) => {
+  const e = error as FetchError;
+  if (e.isAxiosError || (e.code && e.message)) {
     if (
-      (error.code === 'ECONNABORTED' && error.message.includes('timeout')) ||
-      error.code === 'ETIMEDOUT'
+      (e.code === 'ECONNABORTED' && e.message?.includes('timeout')) ||
+      e.code === 'ETIMEDOUT'
     ) {
       return new TimeoutError(
         408,
         undefined,
-        `Request timed out: ${error.message}`,
-        error.response?.headers as AxiosResponseHeaders,
+        `Request timed out: ${e.message}`,
+        e.response?.headers as AxiosResponseHeaders,
       );
-    } else if (error.code === 'ERR_CANCELED') {
-      return new APIUserAbortError(error.message);
+    } else if (e.code === 'ERR_CANCELED') {
+      return new APIUserAbortError(e.message);
     } else {
       return APIError.generate(
-        error.response?.status || 500,
-        error.response?.data as ErrorRes,
-        error.message,
-        error.response?.headers as AxiosResponseHeaders,
+        e.response?.status || 500,
+        e.response?.data as ErrorRes,
+        e.message,
+        e.response?.headers as AxiosResponseHeaders,
       );
     }
   } else {
     return APIError.generate(
       500,
       undefined,
-      `Unexpected error: ${error.message}`,
+      `Unexpected error: ${e.message}`,
       undefined,
     );
   }
 };
 
 // node-fetch is used for streaming requests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const adapterFetch = async (options: any): Promise<any> => {
   const response = await fetch(options.url, {
     body: options.data,

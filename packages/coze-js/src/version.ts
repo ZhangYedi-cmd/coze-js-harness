@@ -2,8 +2,21 @@ import os from 'os';
 
 import pkg from '../package.json';
 const { version } = pkg;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const uni: any;
+declare const uni: {
+  getSystemInfoSync?: () => {
+    platform?: string;
+    system?: string;
+    AppPlatform?: string;
+    appVersion?: string;
+    uniPlatform?: string;
+    SDKVersion?: string;
+    appName?: string;
+    screenWidth?: number;
+    screenHeight?: number;
+    model?: string;
+    brand?: string;
+  };
+};
 
 const getEnv = () => {
   const nodeVersion = process.version.slice(1); // Remove 'v' prefix
@@ -148,7 +161,7 @@ const getUniAppClientUserAgent = (): string => {
     osInfo.version = systemInfo.system || 'unknown';
   } else {
     // Other platforms use platform name directly
-    osInfo.name = systemInfo.platform;
+    osInfo.name = systemInfo.platform ?? 'unknown';
     osInfo.version = systemInfo.system || 'unknown';
   }
 

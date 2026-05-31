@@ -35,8 +35,7 @@ export type RequestOptions = Omit<
 } & Record<string, unknown>;
 
 export interface WebsocketOptions {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  WebSocket?: any; // WebSocket constructor, if none provided, defaults to global WebSocket
+  WebSocket?: new (...args: unknown[]) => WebSocket; // WebSocket constructor, if none provided, defaults to global WebSocket
   maxReconnectionDelay?: number; // max delay in ms between reconnections
   minReconnectionDelay?: number; // min delay in ms between reconnections
   reconnectionDelayGrowFactor?: number; // how fast the reconnection delay grows
@@ -336,8 +335,7 @@ export class APIClient {
     return this._config;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public debugLog(forceDebug = false, ...msgs: any[]) {
+  public debugLog(forceDebug = false, ...msgs: unknown[]) {
     if (this.debug || forceDebug) {
       console.debug(...msgs);
     }

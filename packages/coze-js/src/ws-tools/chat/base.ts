@@ -292,16 +292,14 @@ abstract class BaseWsChatClient {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected log(...args: any[]) {
+  protected log(...args: unknown[]) {
     if (this.config.debug) {
       console.log('[WsChatClient]', ...args);
     }
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected warn(...args: any[]) {
+  protected warn(...args: unknown[]) {
     if (this.config.debug) {
       console.warn('[WsChatClient]', ...args);
     }

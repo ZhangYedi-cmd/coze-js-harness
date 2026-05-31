@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
   interface Window {
     __denoiser: AIDenoiserExtension;
     __denoiserSupported: boolean;
   }
 }
-declare const chrome: any;
+declare const chrome: { runtime?: { id?: string } };
 
 import { logger } from 'agora-rte-extension';
 import AgoraRTC from 'agora-rtc-sdk-ng';
@@ -299,6 +298,7 @@ export function encodeG711U(pcm16: Int16Array): Uint8Array {
  * setValueByPath(obj, 'user.profile.name', 'John');
  * // Result: { user: { profile: { name: 'John' } } }
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setValueByPath<T extends Record<string, any>, V>(
   obj: T,
   path: string,
@@ -313,7 +313,7 @@ export function setValueByPath<T extends Record<string, any>, V>(
   }
 
   const keys = path.split('.');
-  let current: Record<string, any> = obj;
+  let current: Record<string, unknown> = obj;
 
   // Navigate to the last-but-one key
   for (let i = 0; i < keys.length - 1; i++) {
@@ -326,7 +326,7 @@ export function setValueByPath<T extends Record<string, any>, V>(
     if (!current[key] || typeof current[key] !== 'object') {
       current[key] = {};
     }
-    current = current[key] as Record<string, any>;
+    current = current[key] as Record<string, unknown>;
   }
 
   // Set the value at the final key

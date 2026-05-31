@@ -1,6 +1,5 @@
 import { isBrowserExtension } from '../../utils';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const chrome: any;
+declare const chrome: { runtime?: { getURL?: (path: string) => string } };
 
 const WavProcessorWorklet = `
 class WavProcessor extends AudioWorkletProcessor {
@@ -84,7 +83,7 @@ registerProcessor('wav-processor', WavProcessor);
 
 let src = '';
 if (isBrowserExtension()) {
-  src = chrome.runtime.getURL('wav-worklet-processor.js');
+  src = chrome.runtime?.getURL?.('wav-worklet-processor.js') ?? '';
 } else {
   const script = new Blob([WavProcessorWorklet], {
     type: 'application/javascript',
