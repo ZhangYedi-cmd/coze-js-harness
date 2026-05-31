@@ -17,9 +17,9 @@ jobs:
   harness-dispatcher:
     name: Harness Dispatcher
     runs-on: ubuntu-latest
-    # TODO: 配置 ANTHROPIC_API_KEY 后去掉此注释
     # 前置条件：
-    #   1. 在仓库 Settings → Secrets and variables → Actions 中添加 ANTHROPIC_API_KEY
+    #   1. 在仓库 Settings → Secrets and variables → Actions 中添加 CLAUDE_CODE_OAUTH_TOKEN
+    #      （由本地 `claude setup-token` 生成的订阅令牌；无 API 额度时走此方式）
     #   2. GITHUB_TOKEN 由 GitHub 自动注入，无需手动配置
     permissions:
       contents: write      # 创建分支、push 代码
@@ -66,8 +66,8 @@ jobs:
 
       - name: Run harness-dispatcher
         env:
-          # TODO: 在仓库 Secrets 中配置 ANTHROPIC_API_KEY
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # 订阅令牌方式（claude setup-token 生成）；放 CLAUDE_CODE_OAUTH_TOKEN 而非 ANTHROPIC_API_KEY
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # GITHUB_TOKEN 用于 git push 和 gh pr create（GitHub 自动注入，无需手动配置）
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,8 +97,8 @@ jobs:
 
       - name: Rebase open harness PRs
         env:
-          # TODO: 在仓库 Secrets 中配置 ANTHROPIC_API_KEY
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # 订阅令牌方式（claude setup-token 生成）；放 CLAUDE_CODE_OAUTH_TOKEN 而非 ANTHROPIC_API_KEY
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: claude --dangerously-skip-permissions -p "/rebase-harness-prs"
