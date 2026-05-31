@@ -1,0 +1,260 @@
+---
+name: harness-audit
+description: |
+  Harness Engineering 元层。定期读取 docs/harness/ 累计的运行日志，
+  统计每个任务的成功率、失败原因分布、自愈轮次分布，根据成功率自动回写
+  .claude/harness/tasks.md 的 weight 字段，并在日志目录生成 audit 报告。
+  少了它整个体系的配置会随时间漂移失效。
+agent: general-purpose
+allowed-tools: >
+  Read, Edit, Write,
+  Bash(bash *),
+  Bash(node *),
+  Bash(grep *),
+  Bash(awk *),
+  Bash(sed *),
+  Bash(jq *)
+argument-hint: [--days <n>] [--dry-run]
+---
+
+# harness-audit
+
+Harness Engineering 的元层（自迭代闭环）。由 CI 周期性触发（建议每周一次），
+分析自身运行数据，调整任务权重，让整套体系越跑越准。
+
+## 参数解析
+
+从 `$ARGUMENTS` 中解析：
+- `--days <n>`：仅统计最近 N 天的日志（默认 30）
+- `--dry-run`：只输出分析结果，不修改 tasks.md
+
+```
+WINDOW_DAYS = $ARGUMENTS 中 --days 后的值（默认 30）
+DRY_RUN     = $ARGUMENTS 中是否包含 --dry-run
+AUDIT_DATE  = $(date +%Y-%m-%d)
+```
+
+---
+
+## 流程总览
+
+```
+Phase 1  收集运行日志
+Phase 2  统计每个任务的成功率与失败原因分布
+Phase 3  过滤基础设施类失败（API 500、网络超时、鉴权）
+Phase 4  根据成功率计算权重调整
+Phase 5  回写 tasks.md（dry-run 时跳过）
+Phase 6  生成 audit-YYYY-MM-DD.md 报告
+Phase 7  提交 audit 报告（dry-run 时跳过）
+```
+
+---
+
+## Phase 1：收集运行日志
+
+```bash
+HISTORY_JSON=$(node .claude/skills/harness-dispatcher/parse-history.js)
+```
+
+`HISTORY_JSON` 是 `[{ task, date, package, success }, ...]`，但 `parse-history.js`
+不返回失败详情和自愈轮次。所以另外直接扫日志文件，提取以下字段：
+
+```bash
+CUTOFF_DATE=$(date -u -v-${WINDOW_DAYS}d +%Y-%m-%d 2>/dev/null || date -u -d "${WINDOW_DAYS} days ago" +%Y-%m-%d)
+
+# 列出窗口内的日志文件
+LOG_FILES=$(find docs/harness -maxdepth 1 -name "*.md" -type f \
+  | grep -v '^docs/harness/audit-' \
+  | awk -v cutoff="$CUTOFF_DATE" -F/ '{
+      name=$NF;
+      if (match(name, /^[0-9]{4}-[0-9]{2}-[0-9]{2}/)) {
+        d=substr(name, RSTART, RLENGTH);
+        if (d >= cutoff) print $0;
+      }
+    }')
+```
+
+逐个解析每个文件，提取 frontmatter 中的 `task / date / success / quality_check_rounds`，
+并从正文 `## 失败详情` 段落提取 `失败阶段` 和 `错误摘要`。
+
+汇总成结构（在脚本环境里用 JSON / 关联数组都可以）：
+```
+RECORDS = [
+  { task, date, success, rounds, failed_stage, error_summary },
+  ...
+]
+```
+
+**样本不足兜底**：若 `RECORDS` 数量 < 3，跳到 Phase 6 只输出报告（标注"样本不足，未调整权重"），不修改 tasks.md。
+
+---
+
+## Phase 2：按任务聚合统计
+
+对每个出现过的 `task`：
+
+```
+runs           = 该任务的总运行次数
+successes      = success == true 的次数
+failures       = success != true 的次数
+success_rate   = successes / runs
+avg_rounds     = quality_check_rounds 的均值（success=true 的子集）
+recent_3       = 最近 3 次的成功/失败序列（按 date 倒序）
+stage_dist     = 失败按 failed_stage 分布（ts-check / lint / build / skill / 其他）
+err_topk       = 错误摘要按指纹聚合后的 Top 3
+```
+
+打印一份纯文本概览，便于 dry-run 时人看：
+
+```
+task                 runs  succ%  avg_rounds  stage_top      err_top
+dead-code-cleaner    18    89%    1.2         build:1        knip 配置缺失:1
+optimize-any-types   12    50%    3.5         ts-check:5     类型推断不收敛:3
+add-tests             7    29%    4.7         skill:4        无候选包:3
+...
+```
+
+---
+
+## Phase 3：过滤基础设施类失败
+
+把以下失败从 failures 里剔除（不计入成功率），它们不是任务设计问题：
+
+- 错误摘要匹配：`5\d\d` HTTP 状态码、`ECONNRESET`、`ETIMEDOUT`、`socket hang up`
+- 失败阶段标记为 `infra` / `auth` / `network`
+- 错误摘要包含：`401 Unauthorized`、`403 Forbidden`、`rate limit`、`API key`
+
+剔除后重新计算 `success_rate` 与 `failures`，原始数据也保留供 audit 报告引用。
+
+---
+
+## Phase 4：权重调整规则
+
+按文章规则（见 [七、想在自己仓库搭建] 那段 Prompt），对每个任务计算 `delta`：
+
+| 条件 | weight 调整 |
+|---|---|
+| 连续 3 次全部失败（看 `recent_3`） | 设为 0（暂停） |
+| 成功率 < 60% | -5（最低 1） |
+| 60% ≤ 成功率 ≤ 80% | 不变 |
+| 成功率 > 80% | +2 |
+
+**特殊情况**：
+- 若任务原本 `weight: 0` 且最近 N 天没有运行记录，跳过（不要把暂停任务无端激活）
+- 若某任务的 `recent_3` 还不到 3 次，按现有成功率走，不触发"连续 3 次全败"分支
+- 任务在 tasks.md 中 `enabled: false`：跳过
+
+把所有调整记录到 `ADJUSTMENTS`：
+
+```
+[
+  { task: "optimize-any-types", from: 8, to: 3, reason: "success_rate=50% < 60%" },
+  { task: "dead-code-cleaner",  from: 10, to: 12, reason: "success_rate=89% > 80%" },
+  ...
+]
+```
+
+---
+
+## Phase 5：回写 `tasks.md`
+
+`--dry-run` 时跳过本阶段。
+
+对 `ADJUSTMENTS` 中每条记录，用 Edit 工具定位到对应 task 块的 `weight:` 行做替换。
+定位方式：先匹配 `name: <task>`，然后在同一 HTML comment 块内（`<!-- task ... -->`）找 `weight: <数字>` 行替换。
+
+```bash
+# 校验：替换后 tasks.md 仍应包含与调整前同数量的 task 块
+BEFORE=$(grep -c '^<!-- task' .claude/harness/tasks.md)
+# ...执行替换...
+AFTER=$(grep -c '^<!-- task' .claude/harness/tasks.md)
+[ "$BEFORE" = "$AFTER" ] || { echo "❌ tasks.md 结构损坏，回滚"; git checkout .claude/harness/tasks.md; exit 1; }
+```
+
+---
+
+## Phase 6：生成 audit 报告
+
+写入 `docs/harness/audit-$AUDIT_DATE.md`：
+
+````markdown
+---
+type: audit
+date: $AUDIT_DATE
+window_days: $WINDOW_DAYS
+sample_size: <RECORDS 数量>
+---
+
+# Harness Audit — $AUDIT_DATE
+
+窗口：最近 $WINDOW_DAYS 天 · 样本量：N 条
+
+## 任务统计
+
+| 任务 | 运行 | 成功 | 成功率 | 平均自愈轮次 | 主要失败阶段 |
+|---|---|---|---|---|---|
+| dead-code-cleaner | 18 | 16 | 89% | 1.2 | build (1) |
+| ... |
+
+## 失败模式 Top 5
+
+1. `optimize-any-types`：类型推断不收敛（5/6 次失败发生在 ts-check 阶段）
+2. `add-tests`：候选包枯竭 → 4/4 次跳过
+3. ...
+
+## 权重调整
+
+| 任务 | 旧权重 | 新权重 | 调整理由 |
+|---|---|---|---|
+| optimize-any-types | 8 | 3 | success_rate=50% < 60% |
+| dead-code-cleaner | 10 | 12 | success_rate=89% > 80% |
+| ... |
+
+（dry-run 模式不会真实改 tasks.md，本表仅展示建议值。）
+
+## 行动建议（非自动执行）
+
+- `add-tests` 跳过率 >50%：考虑缩短历史排除窗口（30 天 → 14 天），或放宽候选包筛选阈值
+- `optimize-any-types` 平均自愈轮次接近上限：考虑在 prompt 里加更明确的类型修复引导
+
+---
+🤖 Generated by harness-audit
+````
+
+---
+
+## Phase 7：提交 audit 报告
+
+`--dry-run` 时跳过。
+
+audit 不创建工作分支也不开 PR——直接 commit 到当前分支（通常 CI 跑在 main 上时另外开一个 `chore/harness-audit-$AUDIT_DATE` 分支并提 PR；本地手动跑则提到当前分支）。
+
+```bash
+BRANCH="chore/harness-audit-$AUDIT_DATE"
+git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH"
+git add .claude/harness/tasks.md docs/harness/audit-$AUDIT_DATE.md
+git commit -m "chore(harness): audit $AUDIT_DATE — adjust task weights"
+git push -u origin "$BRANCH"
+
+gh pr create \
+  --title "chore(harness): audit $AUDIT_DATE — adjust task weights" \
+  --body-file docs/harness/audit-$AUDIT_DATE.md \
+  --base main
+```
+
+打印结果：
+```
+✅ harness-audit 完成
+   样本量：N 条（最近 $WINDOW_DAYS 天）
+   调整数：M 个任务
+   报告：docs/harness/audit-$AUDIT_DATE.md
+```
+
+---
+
+## 失败模式与防护
+
+- **样本不足**：< 3 条记录时跳过权重调整，只出报告。
+- **tasks.md 结构损坏**：Phase 5 替换前后 task 块数必须相等，否则 `git checkout` 回滚。
+- **错误摘要噪音**：基础设施类失败必须先在 Phase 3 过滤，否则会误降稳定任务的权重。
+- **频繁震荡**：若同一任务在最近两次 audit 中权重被反复升降，应在报告里标记"建议人工介入"，不要自动再次调整。
