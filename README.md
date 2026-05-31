@@ -31,14 +31,15 @@ Find usage examples for each package in the [examples](./examples) directory:
 - [realtime-quickstart-vue](./examples/realtime-quickstart-vue) - Quickstart Vue Demo for @coze/realtime-api
 - [quickstart-oauth-server](./examples/quickstart-oauth-server) - Quickstart OAuth Server Demo for Coze SDK
 - [realtime-websocket](./examples/realtime-websocket) - Websocket realtime Demo for @coze/api/ws-tools
-- [simult-extendsion](./examples/simult-extendsion) - Simult interpretation Extension Demo for @coze/api/ws-tools
+- [simult-extension](./examples/simult-extension) - Simult interpretation Extension Demo for @coze/api/ws-tools
+- [fact-check-extension](./examples/fact-check-extension) - Fact-check Browser Extension Demo for @coze/api
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ (LTS/Hydrogen recommended)
-- pnpm 9.12.0
+- pnpm 9.12.3
 - Rush 5.140.0
 
 ### Installation
@@ -60,7 +61,7 @@ git clone git@github.com:coze-dev/coze-js.git
 3. **Install required global dependencies**
 
 ``` bash
-npm i -g pnpm@9.12.0 @microsoft/rush@5.140.0
+npm i -g pnpm@9.12.3 @microsoft/rush@5.140.0
 ```
 
 4. **Install project dependencies**

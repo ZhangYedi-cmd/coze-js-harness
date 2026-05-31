@@ -29,14 +29,15 @@
 - [realtime-quickstart-vue](./examples/realtime-quickstart-vue) - @coze/realtime-api 快速入门 Vue 示例
 - [quickstart-oauth-server](./examples/quickstart-oauth-server) - Coze SDK OAuth 示例
 - [realtime-websocket](./examples/realtime-websocket) - @coze/api/ws-tools 的 Websocket 实时语音、语音合成、语音识别示例
-- [simult-extendsion](./examples/simult-extendsion) - @coze/api/ws-tools 的同声传译示例
+- [simult-extension](./examples/simult-extension) - @coze/api/ws-tools 的同声传译示例
+- [fact-check-extension](./examples/fact-check-extension) - 基于 @coze/api 的浏览器事实核查扩展示例
 
 ## 🚀 快速开始
 
 ### 前置要求
 
 - Node.js 18+ (推荐 LTS/Hydrogen)
-- pnpm 9.12.0
+- pnpm 9.12.3
 - Rush 5.140.0
 
 ### 安装步骤
@@ -58,7 +59,7 @@ git clone git@github.com:coze-dev/coze-js.git
 3. **安装必需的全局依赖**
 
 ```bash
-npm i -g pnpm@9.12.0 @microsoft/rush@5.140.0
+npm i -g pnpm@9.12.3 @microsoft/rush@5.140.0
 ```
 
 4. **安装项目依赖**
