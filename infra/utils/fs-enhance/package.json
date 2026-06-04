@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "json5": "^2.2.1",
-    "yaml": "^2.2.2"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@coze-infra/eslint-config": "workspace:*",
@@ -22,7 +22,7 @@
     "@coze-infra/vitest-config": "workspace:*",
     "@types/node": "^20",
     "@vitest/coverage-v8": "~2.1.9",
-    "sucrase": "^3.32.0",
+    "sucrase": "^3.35.1",
     "typescript": "^5.5.3",
     "vitest": "~2.1.9"
   }
