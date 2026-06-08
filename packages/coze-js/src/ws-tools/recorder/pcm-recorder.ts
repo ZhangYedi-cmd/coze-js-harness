@@ -367,15 +367,14 @@ class PcmRecorder {
     return new MediaStream([rawTrack]);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private log(...args: any[]) {
+  private log(...args: unknown[]) {
     if (this.config.debug) {
       console.log(...args);
     }
     return true;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private warn(...args: any[]) {
+
+  private warn(...args: unknown[]) {
     if (this.config.debug) {
       console.warn(...args);
     }

@@ -225,8 +225,7 @@ interface ChatConfig {
   /** Whether to save conversation history */
   auto_save_history?: boolean;
   /** Set the value of custom input parameters for the chat flow */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 }
 
 export interface ChatUpdateEvent extends BaseEvent {

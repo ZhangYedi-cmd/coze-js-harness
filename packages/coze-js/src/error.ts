@@ -12,8 +12,7 @@ export class APIError extends CozeError {
   readonly msg: string | null | undefined;
   readonly detail: string | null | undefined;
   readonly logid: string | null | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly rawError: any;
+  readonly rawError: unknown;
 
   constructor(
     status: number | undefined,

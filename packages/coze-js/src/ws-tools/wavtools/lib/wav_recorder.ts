@@ -17,7 +17,7 @@ export type DecodedAudioType = {
 // Define the interface for audio track configuration
 interface AudioTrackConfig {
   // Add any properties needed for audio track configuration
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -30,7 +30,7 @@ export class WavRecorder {
   outputToSpeakers: boolean;
   debug: boolean;
   _deviceChangeCallback: (() => Promise<void>) | null;
-  _devices: any[];
+  _devices: MediaDeviceInfo[];
   stream: MediaStream | null;
   processor: AudioWorkletNode | null;
   source: MediaStreamAudioSourceNode | null;
@@ -38,9 +38,10 @@ export class WavRecorder {
   analyser: AnalyserNode | null;
   recording: boolean;
   _lastEventId: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   eventReceipts: Record<number, any>;
   eventTimeout: number;
-  _chunkProcessor: (data: { mono: ArrayBuffer; raw: ArrayBuffer }) => any;
+  _chunkProcessor: (data: { mono: ArrayBuffer; raw: ArrayBuffer }) => void;
   _chunkProcessorSize: number | undefined;
   _chunkProcessorBuffer: {
     raw: ArrayBuffer;
@@ -170,7 +171,7 @@ export class WavRecorder {
    * @param {...any} args
    * @returns {true}
    */
-  log(...args: any[]): true {
+  log(...args: unknown[]): true {
     if (this.debug) {
       console.log(...args);
     }
@@ -201,7 +202,7 @@ export class WavRecorder {
    */
   private async _event(
     name: string,
-    data: Record<string, any> = {},
+    data: Record<string, unknown> = {},
     _processor: AudioWorkletNode | null = null
   ){
     _processor = _processor || this.processor;
@@ -483,7 +484,7 @@ export class WavRecorder {
    * @returns {Promise<true>}
    */
   async record(
-    chunkProcessor: (data: { mono: ArrayBuffer; raw: ArrayBuffer }) => any = () => {},
+    chunkProcessor: (data: { mono: ArrayBuffer; raw: ArrayBuffer }) => void = () => {},
     chunkSize: number = 8192
   ): Promise<true> {
     if (!this.processor) {

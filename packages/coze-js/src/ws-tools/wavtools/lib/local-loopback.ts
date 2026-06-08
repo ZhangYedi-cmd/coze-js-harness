@@ -395,7 +395,7 @@ class LocalLoopback {
    * @param args - Arguments to pass to console.log
    * @private
    */
-  private _debug(...args: any[]) {
+  private _debug(...args: unknown[]) {
     if (this.isDebug) {
       console.log(...args);
     }
@@ -406,7 +406,7 @@ class LocalLoopback {
    * @param args - Arguments to pass to console.error
    * @private
    */
-  private _error(...args: any[]) {
+  private _error(...args: unknown[]) {
     console.error(...args);
   }
 
@@ -415,7 +415,7 @@ class LocalLoopback {
    * @param args - Arguments to pass to console.warn
    * @private
    */
-  private _warn(...args: any[]) {
+  private _warn(...args: unknown[]) {
     console.warn(...args);
   }
 

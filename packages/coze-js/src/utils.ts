@@ -1,10 +1,9 @@
 /* eslint-disable security/detect-object-injection */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
-declare const uni: any;
-declare const chrome: any;
+declare const uni: unknown;
+declare const chrome: { runtime?: { id?: string } };
 
-export function safeJsonParse(jsonString: string, defaultValue: any = '') {
+export function safeJsonParse(jsonString: string, defaultValue: unknown = '') {
   try {
     return JSON.parse(jsonString);
   } catch (error) {
@@ -26,7 +25,7 @@ export function isBrowser() {
   return typeof window !== 'undefined';
 }
 
-export function isPlainObject(obj: any): boolean {
+export function isPlainObject(obj: unknown): boolean {
   if (typeof obj !== 'object' || obj === null) {
     return false;
   }
@@ -44,6 +43,7 @@ export function isPlainObject(obj: any): boolean {
   return proto === baseProto;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mergeConfig(...objects: any[]) {
   return objects.reduce((result, obj) => {
     if (obj === undefined) {
@@ -66,6 +66,7 @@ export function isPersonalAccessToken(token?: string) {
   return !!token?.startsWith('pat_');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function buildWebsocketUrl(path: string, params?: Record<string, any>) {
   const queryString = Object.entries(params || {})
     .filter(

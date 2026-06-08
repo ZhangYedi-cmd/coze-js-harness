@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { isBrowserExtension } from '../../utils';
-declare const chrome: any;
+declare const chrome: { runtime?: { getURL?: (path: string) => string } };
 
 const AudioProcessorWorklet = `
 class PCMProcessor extends AudioWorkletProcessor {
@@ -55,7 +54,7 @@ registerProcessor('pcm-processor', PCMProcessor);
 
 let src = '';
 if (isBrowserExtension()) {
-  src = chrome.runtime.getURL('pcm-worklet-processor.js');
+  src = chrome.runtime?.getURL?.('pcm-worklet-processor.js') ?? '';
 } else {
   const script = new Blob([AudioProcessorWorklet], {
     type: 'application/javascript',
