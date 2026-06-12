@@ -17,8 +17,7 @@ export const traversalLastNode = (
       node,
       handle,
     );
-    // @ts-expect-error -- linter-disable-autofix
-    node.children.splice(-1, 1, ...contents);
+    (node.children as RootContentLocal[]).splice(-1, 1, ...contents);
     if (node.children.length === 0) {
       return [];
     }

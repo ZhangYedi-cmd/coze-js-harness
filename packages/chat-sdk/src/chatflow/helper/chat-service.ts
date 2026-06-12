@@ -215,7 +215,6 @@ export class ChatFlowService extends ChatService {
     if (this.chatFlowProps?.project?.type === 'bot') {
       const { id: conversationId, last_section_id: sectionId = '' } =
         await this.apiClient.conversations.create({
-          // @ts-expect-error -- linter-disable-autofix
           connector_id: this.connectorId,
         });
       return { conversationId, sectionId };

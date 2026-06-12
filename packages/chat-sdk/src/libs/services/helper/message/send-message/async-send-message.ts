@@ -72,14 +72,16 @@ export class AsyncSendMessage extends MultiSendMessage {
           switch (event) {
             case ChatEventType.CONVERSATION_CHAT_CREATED:
               {
-                const messageNew = safeJSONParse(eventData.data);
-                // @ts-expect-error -- linter-disable-autofix
+                const messageNew = safeJSONParse(eventData.data) as {
+                  id?: string;
+                  section_id?: string;
+                } | null;
                 const { id: chatId, section_id: sectionId } = messageNew || {};
                 this.messageSended.chat_id = chatId || '';
                 this.messageSended.section_id = sectionId;
                 this.messageSended.extData = {
-                  // @ts-expect-error -- linter-disable-autofix
-                  executeId: data?.execute_id,
+                  executeId: (data as { execute_id?: string } | undefined)
+                    ?.execute_id,
                 };
                 this.messageSended = { ...this.messageSended };
                 this.messageList = [this.messageSended, ...(messageList || [])];

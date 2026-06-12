@@ -32,7 +32,6 @@ export class ChatService implements IChatService {
     const { id: conversationId, last_section_id: sectionId = '' } =
       await this.apiClient.conversations.create({
         bot_id: this.appId,
-        // @ts-expect-error -- linter-disable-autofix
         connector_id: this.connectorId,
       });
     return { conversationId, sectionId };
@@ -47,7 +46,6 @@ export class ChatService implements IChatService {
     try {
       const result = await this.apiClient.bots.retrieve({
         bot_id: this.appId,
-        // @ts-expect-error -- linter-disable-autofix
         connector_id: this.connectorId,
       });
       return {
@@ -143,8 +141,10 @@ export class ChatService implements IChatService {
     return this.apiClient.files.upload(params, options);
   }
   async translation(params: CreateFileReq, options?: RequestOptions) {
-    // @ts-expect-error -- linter-disable-autofix
-    return await this.apiClient.audio.transcriptions(params, options);
+    return await this.apiClient.audio.transcriptions.create(
+      params as Parameters<typeof this.apiClient.audio.transcriptions.create>[0],
+      options,
+    );
   }
   async audioSpeech(params: {
     input: string;

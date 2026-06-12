@@ -157,12 +157,11 @@ export class MultiSendMessage extends RawSendMessage {
         };
       }
       case 'file': {
+        const file = fileInfo.file as File;
         return {
           type: 'file',
-          // @ts-expect-error -- linter-disable-autofix
-          name: fileInfo.file.name,
-          // @ts-expect-error -- linter-disable-autofix
-          size: fileInfo.file.size,
+          name: file.name,
+          size: String(file.size),
           file_url: fileInfo.tempFilePath,
           file_info: fileInfo,
         };

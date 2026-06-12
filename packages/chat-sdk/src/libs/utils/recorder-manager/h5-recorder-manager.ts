@@ -98,16 +98,24 @@ export class H5RecorderManager extends BaseRecorderManager {
     }
     const { numberOfChannels } = this.options;
 
-    this.audioContext = new (window.AudioContext ||
-      // @ts-expect-error -- linter-disable-autofix
-      window.webkitAudioContext)();
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as Window & { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AudioContextClass) {
+      throw new Error('AudioContext is not supported in this browser');
+    }
+    this.audioContext = new AudioContextClass();
     this.audioSource = this.audioContext.createMediaStreamSource(this.stream);
     this.analyser = this.audioContext.createAnalyser();
     this.analyser.fftSize = 128;
     const createAudioNode =
       this.audioContext.createScriptProcessor ||
-      // @ts-expect-error -- linter-disable-autofix
-      this.audioContext.createJavaScriptNode;
+      (
+        this.audioContext as AudioContext & {
+          createJavaScriptNode?: AudioContext['createScriptProcessor'];
+        }
+      ).createJavaScriptNode;
     const processor = createAudioNode.call(
       this.audioContext,
       4096,
