@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -27,7 +27,7 @@ vi.mock('@/libs', () => ({
 }));
 
 vi.mock('@/libs/hooks', () => ({
-  useUpdateEffect: (callback: () => void, deps: any[]) => {
+  useUpdateEffect: (callback: () => void, deps: unknown[]) => {
     React.useEffect(callback, deps);
   },
 }));
