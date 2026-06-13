@@ -245,8 +245,7 @@ export class MiniCozeApi extends CozeAPI {
           urlPath: '/v1/files/upload',
         });
     }
-    // @ts-expect-error -- linter-disable-autofix
-    this.audio.transcriptions = (
+    this.audio.transcriptions.create = async (
       params: CreateFileReq,
       options?: RequestOptions,
     ) => {
@@ -255,7 +254,7 @@ export class MiniCozeApi extends CozeAPI {
         params,
         options,
         urlPath: '/v1/audio/transcriptions',
-      });
+      }) as unknown as ReturnType<typeof this.audio.transcriptions.create>;
     };
   }
   // eslint-disable-next-line complexity

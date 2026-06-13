@@ -168,8 +168,8 @@ export abstract class RawSendMessage implements ISendMessage {
       ...{
         content: message.content as string,
         content_type: message.content_type as ContentType,
-        // @ts-expect-error -- linter-disable-autofix
-        isAudioTranslatingToText: message.isAudioTranslatingToText,
+        isAudioTranslatingToText: (message as Partial<ChatMessage>)
+          .isAudioTranslatingToText,
       },
     };
     this.messageList = [this.messageSended];

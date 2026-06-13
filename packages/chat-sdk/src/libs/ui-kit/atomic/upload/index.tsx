@@ -68,19 +68,25 @@ export const Upload: FC<
                 success(res) {
                   logger.debug('chooseMedia success:', res);
                   const fileInfos: ChooseFileInfo[] = res.tempFiles.map(
-                    item => ({
-                      from: 'Taro_Image_Chooser',
-                      type:
-                        // @ts-expect-error -- linter-disable-autofix
-                        item.fileType === 'image' || item.mediaType === 'image'
-                          ? FileTypeEnum.IMAGE
-                          : FileTypeEnum.VIDEO,
-                      size: item.size,
-                      tempFilePath: item.tempFilePath,
-                      file: {
-                        filePath: item.tempFilePath,
-                      },
-                    }),
+                    item => {
+                      const itemWithMediaType = item as typeof item & {
+                        fileType?: string;
+                        mediaType?: string;
+                      };
+                      return {
+                        from: 'Taro_Image_Chooser',
+                        type:
+                          itemWithMediaType.fileType === 'image' ||
+                          itemWithMediaType.mediaType === 'image'
+                            ? FileTypeEnum.IMAGE
+                            : FileTypeEnum.VIDEO,
+                        size: item.size,
+                        tempFilePath: item.tempFilePath,
+                        file: {
+                          filePath: item.tempFilePath,
+                        },
+                      };
+                    },
                   );
                   onChooseFile?.(fileInfos);
                 },
