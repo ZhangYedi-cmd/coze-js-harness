@@ -66,7 +66,7 @@ export async function* requestSSE(
         throw new Error('EventSourceRequest has been closed');
       }
     }
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-unmodified-loop-condition -- isDone is set in onClose/onError callbacks
   } while (!isDone);
 
   function genNextPromise() {
