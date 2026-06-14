@@ -11,6 +11,7 @@ This monorepo contains the following packages:
 |---------|------------|---------|
 | [@coze/api](./packages/coze-js) | Coze API SDK | [![npm](https://img.shields.io/npm/v/@coze/api.svg)](https://www.npmjs.com/package/@coze/api) |
 | [@coze/realtime-api](./packages/realtime-api) | Realtime API SDK | [![npm](https://img.shields.io/npm/v/@coze/realtime-api.svg)](https://www.npmjs.com/package/@coze/realtime-api) |
+| [@coze/chat-sdk](./packages/chat-sdk) | Chat SDK for Taro and Web | [![npm](https://img.shields.io/npm/v/@coze/chat-sdk.svg)](https://www.npmjs.com/package/@coze/chat-sdk) |
 | [@coze/taro-api](./packages/coze-taro) | Taro Mini Program Coze API SDK | [![npm](https://img.shields.io/npm/v/@coze/taro-api.svg)](https://www.npmjs.com/package/@coze/taro-api) |
 | [@coze/uniapp-api](./packages/coze-uniapp) | UniApp Mini Program Coze API SDK | [![npm](https://img.shields.io/npm/v/@coze/uniapp-api.svg)](https://www.npmjs.com/package/@coze/uniapp-api) |
 
