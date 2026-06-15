@@ -312,10 +312,9 @@ export class BaseWsChatClient {
 
   /**
    * Log a message if debug is enabled
-   * @param {...any} args - The arguments to log
+   * @param args - The arguments to log
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected log(...args: any[]) {
+  protected log(...args: unknown[]) {
     if (this.config.debug) {
       console.log('[WsChatClient]', ...args);
     }
@@ -324,10 +323,9 @@ export class BaseWsChatClient {
 
   /**
    * Log a warning message if debug is enabled
-   * @param {...any} args - The arguments to log
+   * @param args - The arguments to log
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected warn(...args: any[]) {
+  protected warn(...args: unknown[]) {
     if (this.config.debug) {
       console.warn('[WsChatClient]', ...args);
     }

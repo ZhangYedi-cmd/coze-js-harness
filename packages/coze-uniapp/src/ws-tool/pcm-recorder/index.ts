@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * PcmRecorder for WeChat Mini Program
  * Records audio using the uni.getRecorderManager API and provides PCM data
@@ -219,7 +218,7 @@ export class PcmRecorder {
    * Log messages when debug is enabled
    * @private
    */
-  private log(...args: any[]): void {
+  private log(...args: unknown[]): void {
     if (this.config.debug) {
       console.log('[PcmRecorder]', ...args);
     }

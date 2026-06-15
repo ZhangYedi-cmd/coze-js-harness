@@ -36,8 +36,7 @@ export class Events {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trigger(eventName: string, ...args: any[]) {
+  trigger(eventName: string, ...args: unknown[]) {
     const callbacks = this.events[eventName];
     if (callbacks) {
       callbacks.forEach(callback => {

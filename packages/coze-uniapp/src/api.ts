@@ -120,7 +120,7 @@ export class CozeAPI extends InnerCozeAPI {
               });
             }
           },
-          fail: (err: any) => {
+          fail: (err: UniNamespace.GeneralCallbackResult) => {
             reject(err);
           },
         });

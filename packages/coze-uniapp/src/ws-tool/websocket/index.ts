@@ -1,8 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // UniApp WebSocket 适配器
+
+type UniAppWSEvent =
+  | { type: 'open'; target: UniAppWebSocket }
+  | { type: 'message'; data: string | ArrayBuffer; target: UniAppWebSocket }
+  | { type: 'close'; code: number; reason: string; wasClean: boolean; target: UniAppWebSocket }
+  | { type: 'error'; error: UniNamespace.GeneralCallbackResult; target: UniAppWebSocket };
+
 export class UniAppWebSocket implements WebSocket {
-  private ws: any;
-  private eventListeners: Record<string, Array<(event: any) => void>> = {
+  private ws: UniNamespace.SocketTask | undefined;
+  private eventListeners: Record<string, Array<EventListener>> = {
     open: [],
     message: [],
     close: [],
@@ -26,7 +32,7 @@ export class UniAppWebSocket implements WebSocket {
   extensions = '';
   binaryType: BinaryType = 'blob';
 
-  constructor(url: string | URL, protocols?: string | string[], options?: any) {
+  constructor(url: string | URL, protocols?: string | string[], options?: unknown) {
     // 如需要，将 URL 对象转换为字符串
     this.url = typeof url === 'string' ? url : url.toString();
     this.protocol = Array.isArray(protocols) ? protocols[0] : protocols || '';
@@ -43,35 +49,24 @@ export class UniAppWebSocket implements WebSocket {
       success: () => {
         // WebSocket 连接已初始化，但尚未连接
       },
-      fail: (error: any) => {
-        this.dispatchEvent({
-          type: 'error',
-          error,
-          target: this,
-        });
+      fail: (error: UniNamespace.GeneralCallbackResult) => {
+        this.emitEvent({ type: 'error', error, target: this });
       },
     });
 
     // Register event handlers
     this.ws.onOpen(() => {
       this.readyState = this.OPEN;
-      this.dispatchEvent({
-        type: 'open',
-        target: this,
-      });
+      this.emitEvent({ type: 'open', target: this });
     });
 
     this.ws.onMessage((res: { data: string | ArrayBuffer }) => {
-      this.dispatchEvent({
-        type: 'message',
-        data: res.data,
-        target: this,
-      });
+      this.emitEvent({ type: 'message', data: res.data, target: this });
     });
 
     this.ws.onClose((res: { code?: number; reason?: string }) => {
       this.readyState = this.CLOSED;
-      this.dispatchEvent({
+      this.emitEvent({
         type: 'close',
         code: res.code || 1000,
         reason: res.reason || '',
@@ -80,13 +75,9 @@ export class UniAppWebSocket implements WebSocket {
       });
     });
 
-    this.ws.onError((res: any) => {
+    this.ws.onError((res: UniNamespace.GeneralCallbackResult) => {
       console.log('WebSocket error:', res);
-      this.dispatchEvent({
-        type: 'error',
-        error: res,
-        target: this,
-      });
+      this.emitEvent({ type: 'error', error: res, target: this });
     });
   }
 
@@ -95,17 +86,13 @@ export class UniAppWebSocket implements WebSocket {
       throw new Error('WebSocket is not open');
     }
 
-    this.ws.send({
-      data,
+    this.ws?.send({
+      data: data as string | ArrayBuffer,
       success: () => {
         // 数据发送成功
       },
-      fail: (error: any) => {
-        this.dispatchEvent({
-          type: 'error',
-          error,
-          target: this,
-        });
+      fail: (error: UniNamespace.GeneralCallbackResult) => {
+        this.emitEvent({ type: 'error', error, target: this });
       },
     });
   }
@@ -116,18 +103,14 @@ export class UniAppWebSocket implements WebSocket {
     }
 
     this.readyState = this.CLOSING;
-    this.ws.close({
+    this.ws?.close({
       code: code || 1000,
       reason: reason || '',
       success: () => {
         // 连接已成功关闭
       },
-      fail: (error: any) => {
-        this.dispatchEvent({
-          type: 'error',
-          error,
-          target: this,
-        });
+      fail: (error: UniNamespace.GeneralCallbackResult) => {
+        this.emitEvent({ type: 'error', error, target: this });
       },
     });
   }
@@ -136,7 +119,7 @@ export class UniAppWebSocket implements WebSocket {
     if (!this.eventListeners[type]) {
       this.eventListeners[type] = [];
     }
-    this.eventListeners[type].push(listener as (event: any) => void);
+    this.eventListeners[type].push(listener);
   }
 
   removeEventListener(type: string, listener: EventListener): void {
@@ -148,20 +131,23 @@ export class UniAppWebSocket implements WebSocket {
     );
   }
 
-  dispatchEvent(event: any): boolean {
+  dispatchEvent(event: Event): boolean {
+    this.emitEvent(event as unknown as UniAppWSEvent);
+    return true;
+  }
+
+  private emitEvent(event: UniAppWSEvent): void {
     const listeners = this.eventListeners[event.type] || [];
     listeners.forEach(listener => {
-      listener(event);
+      listener.call(this, event as unknown as Event);
     });
 
     // 如果定义了 on* 处理函数，则调用它
     const handlerName = `on${event.type}` as keyof UniAppWebSocket;
-    const handler = this[handlerName] as ((event: any) => void) | undefined;
+    const handler = this[handlerName] as unknown as ((event: UniAppWSEvent) => void) | undefined;
     if (handler && typeof handler === 'function') {
       handler.call(this, event);
     }
-
-    return true;
   }
 
   // 事件处理器
