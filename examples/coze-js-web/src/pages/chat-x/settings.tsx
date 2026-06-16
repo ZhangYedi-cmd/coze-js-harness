@@ -25,8 +25,7 @@ const Settings = ({ onSettingsChange }: { onSettingsChange: () => void }) => {
   }, [form]);
 
   // handle settings save
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSettingsSave = (values: any) => {
+  const handleSettingsSave = (values: Record<string, string>) => {
     Object.entries(values).forEach(([key, value]) => {
       localStorage.setItem(`chat-x_${key}`, value as string);
     });
