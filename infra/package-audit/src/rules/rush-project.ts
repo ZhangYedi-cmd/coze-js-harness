@@ -26,19 +26,29 @@ export const checkRushProjectFile: AuditRule<unknown> = {
         content: 'should provide "config/rush-project.json" file.',
       });
     } else {
-      // TODO: Add error handling for readJsonFile
-      const projectConfig = await readJsonFile<{
-        operationSettings: {
+      let projectConfig: {
+        operationSettings?: {
           operationName: string;
           outputFolderNames: string[];
         }[];
-      }>(rushProjectFilePath);
+      };
+      try {
+        projectConfig = await readJsonFile<typeof projectConfig>(
+          rushProjectFilePath,
+        );
+      } catch (e) {
+        res.push({
+          content: `failed to parse "config/rush-project.json": ${
+            e instanceof Error ? e.message : String(e)
+          }.`,
+        });
+        return res;
+      }
+      const operationSettings = projectConfig?.operationSettings ?? [];
       commands.forEach(c => {
         if (
           isEmptyCmd(packageJson.scripts?.[c]) === false &&
-          projectConfig.operationSettings.findIndex(
-            r => r.operationName === c,
-          ) < 0
+          operationSettings.findIndex(r => r.operationName === c) < 0
         ) {
           res.push({
             content: `should provide "${c}" cache config in config file.`,

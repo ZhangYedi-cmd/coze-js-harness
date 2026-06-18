@@ -107,4 +107,35 @@ describe('rule-rush-project', () => {
     const res = await checkRushProjectFile.fn(mockProject);
     expect(res.length).toBe(2);
   });
+
+  it('Should report if config file fails to parse', async () => {
+    (isFileExists as Mock).mockResolvedValue(true);
+    const mockProject = {
+      projectFolder: '/path/to/project',
+      packageJson: {
+        scripts: { build: 'tsc -b', 'test:cov': 'test' },
+      },
+    };
+    (readJsonFile as Mock).mockRejectedValue(
+      new Error('Unexpected end of JSON input'),
+    );
+
+    const res = await checkRushProjectFile.fn(mockProject);
+    expect(res.length).toBe(1);
+    expect(res[0].content).toContain('failed to parse');
+  });
+
+  it('Should not throw if operationSettings is absent', async () => {
+    (isFileExists as Mock).mockResolvedValue(true);
+    const mockProject = {
+      projectFolder: '/path/to/project',
+      packageJson: {
+        scripts: { build: 'tsc -b', 'test:cov': 'test' },
+      },
+    };
+    (readJsonFile as Mock).mockResolvedValue({});
+
+    const res = await checkRushProjectFile.fn(mockProject);
+    expect(res.length).toBe(2);
+  });
 });
