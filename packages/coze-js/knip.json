@@ -1,0 +1,5 @@
+{
+  "entry": ["src/index.ts", "src/ws-tools/index.ts"],
+  "project": ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.spec.ts"],
+  "ignore": ["dist/**", "node_modules/**"]
+}
