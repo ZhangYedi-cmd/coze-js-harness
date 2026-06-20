@@ -1,6 +1,4 @@
-// @ts-expect-error no types
 import { OggOpusDecoder } from 'opus-encdec/src/oggOpusDecoder.js';
-// @ts-expect-error no types
 import OpusDecoderLib from 'opus-encdec/dist/libopus-decoder.js';
 
 export interface OpusDecoderConfig {

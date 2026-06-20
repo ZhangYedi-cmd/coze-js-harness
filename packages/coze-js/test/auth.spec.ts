@@ -304,7 +304,6 @@ describe('Auth functions', () => {
         crypto: mockCrypto,
       };
 
-      // @ts-expect-error - Mocking global window
       vi.stubGlobal('window', mockWindow);
 
       const { url, codeVerifier } = await getPKCEAuthenticationUrl(mockConfig);
@@ -326,7 +325,6 @@ describe('Auth functions', () => {
       const mockUni = {
         getRandomValues: vi.fn(),
       };
-      // @ts-expect-error - Mocking global uni
       vi.stubGlobal('uni', mockUni);
 
       await expect(getPKCEAuthenticationUrl(mockConfig)).rejects.toThrow(
