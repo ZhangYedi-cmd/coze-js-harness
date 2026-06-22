@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 import os from 'os';
 
@@ -29,8 +28,7 @@ const mockUni = {
   getSystemInfoSync: vi.fn(),
 };
 
-// @ts-expect-error: Mock uni global
-global.uni = mockUni;
+(global as Record<string, unknown>).uni = mockUni;
 
 // Use actual implementation for version.ts but mock specific functions
 vi.mock('../src/version', async () => {
@@ -59,14 +57,12 @@ describe('Version utilities', () => {
       env: {},
     };
 
-    // @ts-expect-error: Partial process mock
     global.process = Object.assign({}, originalProcess, mockProcess);
     vi.mocked(os.release).mockReturnValue('5.4.0-1234-generic');
   });
 
   afterEach(() => {
     // Restore original process after each test
-    // @ts-expect-error: Restore process
     global.process = originalProcess;
     vi.clearAllMocks();
   });
@@ -80,8 +76,7 @@ describe('Version utilities', () => {
     });
 
     it('should return correct user agent string for macOS', () => {
-      // @ts-expect-error
-      process.platform = 'darwin';
+      (process as { platform: string }).platform = 'darwin';
       vi.mocked(os.release).mockReturnValue('20.0.0');
 
       const userAgent = getUserAgent();
@@ -89,8 +84,7 @@ describe('Version utilities', () => {
     });
 
     it('should return correct user agent string for Windows', () => {
-      // @ts-expect-error
-      process.platform = 'win32';
+      (process as { platform: string }).platform = 'win32';
       vi.mocked(os.release).mockReturnValue('10.0.19042');
 
       const userAgent = getUserAgent();
@@ -120,8 +114,7 @@ describe('Version utilities', () => {
     };
 
     beforeEach(() => {
-      // @ts-expect-error
-      global.navigator = mockNavigator;
+      (global as Record<string, unknown>).navigator = mockNavigator;
     });
 
     it('should return correct JSON string for Chrome on macOS', () => {
@@ -138,8 +131,7 @@ describe('Version utilities', () => {
     });
 
     it('should return correct JSON string for Firefox', () => {
-      // @ts-expect-error
-      global.navigator.userAgent =
+      (global.navigator as { userAgent: string }).userAgent =
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0';
 
       const userAgent = getBrowserClientUserAgent();
@@ -155,8 +147,7 @@ describe('Version utilities', () => {
     });
 
     it('should return correct JSON string for Safari', () => {
-      // @ts-expect-error
-      global.navigator.userAgent =
+      (global.navigator as { userAgent: string }).userAgent =
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15';
 
       const userAgent = getBrowserClientUserAgent();
@@ -172,8 +163,7 @@ describe('Version utilities', () => {
     });
 
     it('should handle unknown browser and OS', () => {
-      // @ts-expect-error
-      global.navigator.userAgent = 'Unknown Browser';
+      (global.navigator as { userAgent: string }).userAgent = 'Unknown Browser';
 
       const userAgent = getBrowserClientUserAgent();
       const parsed = JSON.parse(userAgent);
