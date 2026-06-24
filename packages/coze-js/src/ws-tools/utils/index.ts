@@ -298,8 +298,7 @@ export function encodeG711U(pcm16: Int16Array): Uint8Array {
  * setValueByPath(obj, 'user.profile.name', 'John');
  * // Result: { user: { profile: { name: 'John' } } }
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function setValueByPath<T extends Record<string, any>, V>(
+export function setValueByPath<T extends object, V>(
   obj: T,
   path: string,
   value: V,
@@ -313,7 +312,7 @@ export function setValueByPath<T extends Record<string, any>, V>(
   }
 
   const keys = path.split('.');
-  let current: Record<string, unknown> = obj;
+  let current: Record<string, unknown> = obj as unknown as Record<string, unknown>;
 
   // Navigate to the last-but-one key
   for (let i = 0; i < keys.length - 1; i++) {

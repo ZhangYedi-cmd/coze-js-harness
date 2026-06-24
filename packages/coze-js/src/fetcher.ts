@@ -5,6 +5,7 @@ import axios, {
   type AxiosResponse,
   type AxiosInstance,
   type AxiosStatic,
+  type InternalAxiosRequestConfig,
 } from 'axios';
 
 import { isBrowser, isBrowserExtension, isUniApp } from './utils';
@@ -69,15 +70,24 @@ const handleError = (error: unknown) => {
 };
 
 // node-fetch is used for streaming requests
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const adapterFetch = async (options: any): Promise<any> => {
-  const response = await fetch(options.url, {
+export const adapterFetch = async (
+  options: InternalAxiosRequestConfig,
+): Promise<AxiosResponse> => {
+  const response = await fetch(options.url ?? '', {
+    method: options.method,
     body: options.data,
-    ...options,
+    headers: options.headers as unknown as Record<string, string>,
+    signal: options.signal as unknown as null | undefined,
   });
   return {
     data: response.body,
-    ...response,
+    status: response.status,
+    statusText: response.statusText,
+    headers: Object.fromEntries(
+      response.headers.entries(),
+    ) as AxiosResponseHeaders,
+    config: options,
+    request: response,
   };
 };
 
@@ -159,8 +169,9 @@ new CozeAPI({
                 if (error?.code === 4101) {
                   checkError();
                 }
-                // eslint-disable-next-line no-empty
-              } catch (e) {}
+              } catch {
+                // buffer is not valid JSON, ignore
+              }
               yield fieldValues as ResultType;
             }
             break;

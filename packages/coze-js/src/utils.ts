@@ -66,8 +66,7 @@ export function isPersonalAccessToken(token?: string) {
   return !!token?.startsWith('pat_');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function buildWebsocketUrl(path: string, params?: Record<string, any>) {
+export function buildWebsocketUrl(path: string, params?: object) {
   const queryString = Object.entries(params || {})
     .filter(
       ([_, value]) => value !== undefined && value !== null && value !== '',
