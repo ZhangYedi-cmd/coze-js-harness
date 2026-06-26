@@ -159,8 +159,9 @@ new CozeAPI({
                 if (error?.code === 4101) {
                   checkError();
                 }
-                // eslint-disable-next-line no-empty
-              } catch (e) {}
+              } catch {
+                // buffer may not be valid JSON - swallow parse errors intentionally
+              }
               yield fieldValues as ResultType;
             }
             break;

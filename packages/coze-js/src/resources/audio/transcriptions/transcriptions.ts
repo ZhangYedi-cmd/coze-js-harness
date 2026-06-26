@@ -22,8 +22,7 @@ export class Transcriptions extends APIResource {
   }
 }
 export interface CreateTranscriptionReq {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  file: File | any;
+  file: Blob;
 }
 
 export interface TranscriptionData {
