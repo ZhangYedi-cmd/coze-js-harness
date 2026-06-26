@@ -40,8 +40,7 @@ export class Files extends APIResource {
   }
 }
 export interface CreateFileReq {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  file: File | any;
+  file: Blob;
 }
 
 export interface FileObject {

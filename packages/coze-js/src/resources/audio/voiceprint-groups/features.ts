@@ -90,8 +90,7 @@ export class VoiceprintFeature extends APIResource {
 }
 
 export interface CreateVoiceprintFeatureReq {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  file: File | any;
+  file: Blob;
   name: string;
   desc?: string;
   // Only required for PCM files
@@ -101,8 +100,7 @@ export interface CreateVoiceprintFeatureReq {
 }
 
 export interface UpdateVoiceprintFeatureReq {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  file?: File | any;
+  file?: Blob;
   name?: string;
   desc?: string;
   // Only required for PCM files
@@ -137,8 +135,7 @@ export interface VoiceprintFeature {
 }
 
 export interface SpeakerIdentifyReq {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  file: File | any;
+  file: Blob;
   top_k?: number;
   sample_rate?: number;
   channel?: number;
