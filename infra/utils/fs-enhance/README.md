@@ -1,4 +1,4 @@
-# @coze-infra/file-enhance
+# @coze-infra/fs-enhance
 
 ## Descriptions
 
