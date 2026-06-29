@@ -59,14 +59,12 @@ describe('Version utilities', () => {
       env: {},
     };
 
-    // @ts-expect-error: Partial process mock
-    global.process = Object.assign({}, originalProcess, mockProcess);
+    global.process = Object.assign({}, originalProcess, mockProcess) as NodeJS.Process;
     vi.mocked(os.release).mockReturnValue('5.4.0-1234-generic');
   });
 
   afterEach(() => {
     // Restore original process after each test
-    // @ts-expect-error: Restore process
     global.process = originalProcess;
     vi.clearAllMocks();
   });
