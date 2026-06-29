@@ -1,6 +1,4 @@
-// @ts-expect-error no types
 import { OggOpusEncoder } from 'opus-encdec/src/oggOpusEncoder.js';
-// @ts-expect-error no types
 import OpusEncoderLib from 'opus-encdec/dist/libopus-encoder.js';
 import { type IAudioProcessorContext } from 'agora-rte-extension';
 
@@ -38,16 +36,17 @@ class OpusAudioProcessor extends BaseAudioProcessor {
       rawOpus: true,
       originalSampleRate: audioContext.sampleRate,
     };
-    this.encoder = new OggOpusEncoder(encoderConfig, OpusEncoderLib);
-    if (this.encoder.isReady === false && this.encoder.onready) {
+    const encoder = new OggOpusEncoder(encoderConfig, OpusEncoderLib);
+    this.encoder = encoder;
+    if (encoder.isReady === false && encoder.onready) {
       await new Promise(resolve => {
-        this.encoder.onready = resolve;
+        encoder.onready = resolve;
       });
     }
     this.encoderReady = true;
 
     this.workletNode.port.onmessage = event => {
-      if (!this.encoderReady) {
+      if (!this.encoderReady || !this.encoder) {
         return;
       }
       const float32 = event.data.audioData as Float32Array;
