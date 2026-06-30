@@ -115,4 +115,66 @@ describe('Bots', () => {
       expect(result).toEqual(mockResponse.data);
     });
   });
+
+  describe('listNew', () => {
+    it('should list bots with new API', async () => {
+      const mockResponse = {
+        data: {
+          bots: [{ bot_id: 'bot-1', name: 'Bot 1' }],
+          total: 1,
+          has_more: false,
+        },
+      };
+      vi.spyOn(client, 'get').mockResolvedValue(mockResponse);
+
+      const params = { workspace_id: 'ws-1', publish_status: 'published_online' };
+
+      const result = await bots.listNew(params);
+
+      expect(client.get).toHaveBeenCalledWith('/v1/bots', params, false, undefined);
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list bots with minimal params', async () => {
+      const mockResponse = { data: { bots: [], total: 0, has_more: false } };
+      vi.spyOn(client, 'get').mockResolvedValue(mockResponse);
+
+      const result = await bots.listNew({});
+
+      expect(client.get).toHaveBeenCalledWith('/v1/bots', {}, false, undefined);
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('retrieveNew', () => {
+    it('should retrieve bot info with new API', async () => {
+      const mockResponse = { data: { bot_id: 'bot-1', name: 'Bot 1' } };
+      vi.spyOn(client, 'get').mockResolvedValue(mockResponse);
+
+      const result = await bots.retrieveNew('bot-1');
+
+      expect(client.get).toHaveBeenCalledWith(
+        '/v1/bots/bot-1',
+        undefined,
+        false,
+        undefined,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should retrieve bot info with is_published param', async () => {
+      const mockResponse = { data: { bot_id: 'bot-1', name: 'Bot 1' } };
+      vi.spyOn(client, 'get').mockResolvedValue(mockResponse);
+
+      const result = await bots.retrieveNew('bot-1', { is_published: true });
+
+      expect(client.get).toHaveBeenCalledWith(
+        '/v1/bots/bot-1',
+        { is_published: true },
+        false,
+        undefined,
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
 });
