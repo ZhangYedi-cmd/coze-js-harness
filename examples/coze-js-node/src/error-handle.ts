@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/naming-convention */
 import assert from 'assert';
 
@@ -23,11 +21,11 @@ async function test_BadRequestError() {
 
 async function test_AuthenticationError() {
   try {
-    const client = new CozeAPI({
+    const testClient = new CozeAPI({
       baseURL,
       token: 'pat_1234567890',
     });
-    await client.chat.retrieve('wrong chat id', 'wrong conversation id');
+    await testClient.chat.retrieve('wrong chat id', 'wrong conversation id');
   } catch (err) {
     assert(err instanceof CozeAPI.AuthenticationError);
     console.log('test_AuthenticationError', err.name);
@@ -37,7 +35,7 @@ async function test_AuthenticationError() {
 async function test_PermissionDeniedError() {
   assert(spaceId, 'spaceId is required');
   try {
-    const bot = await client.bots.create({
+    await client.bots.create({
       space_id: spaceId,
       name: 'test',
       description: 'test',
@@ -51,11 +49,11 @@ async function test_PermissionDeniedError() {
 async function test_NotFoundError() {
   assert(spaceId, 'spaceId is required');
   try {
-    const client = new CozeAPI({
+    const testClient = new CozeAPI({
       baseURL: 'https://api.coze.cn/xxx',
       token: '',
     });
-    await client.bots.create({
+    await testClient.bots.create({
       space_id: spaceId,
       name: 'test',
       description: 'test',
@@ -68,10 +66,7 @@ async function test_NotFoundError() {
 
 async function test_Wrongchat() {
   try {
-    const chat = await client.chat.retrieve(
-      'wrong chat id',
-      'wrong conversation id',
-    );
+    await client.chat.retrieve('wrong chat id', 'wrong conversation id');
   } catch (err) {
     assert(err instanceof CozeAPI.APIError);
     console.log('test_Wrongchat', err.name);
@@ -101,7 +96,7 @@ async function test_global_onApiError() {
   let error: APIError | undefined;
   let error2: APIError | undefined;
   try {
-    const client = new CozeAPI({
+    const testClient = new CozeAPI({
       baseURL: 'https://api.coze.cn',
       token: apiKey,
       onApiError: (err: APIError) => {
@@ -110,7 +105,7 @@ async function test_global_onApiError() {
       },
       debug: false,
     });
-    await client.chat.retrieve('wrong chat id', 'wrong conversation id');
+    await testClient.chat.retrieve('wrong chat id', 'wrong conversation id');
   } catch (err) {
     error2 = err as APIError;
   } finally {

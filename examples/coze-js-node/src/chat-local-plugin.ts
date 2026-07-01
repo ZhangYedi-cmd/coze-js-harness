@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { type AxiosResponseHeaders } from 'axios';
+
 import {
   ChatEventType,
   RoleType,
@@ -65,7 +66,7 @@ async function handleStream(result: AsyncIterable<StreamChatData>) {
         },
         {
           transformResponse: [
-            function (data: any, headers: any) {
+            function (data: unknown, headers: AxiosResponseHeaders) {
               // get logid from headers
               // only work in node environment
               console.log('logid', headers['x-tt-logid']);

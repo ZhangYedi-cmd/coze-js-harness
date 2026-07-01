@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/naming-convention */
 import assert from 'assert';
 
@@ -88,7 +87,7 @@ async function test_timeout_with_signal() {
 
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 10);
-    const result = await client.chat.create(
+    await client.chat.create(
       {
         bot_id: botId,
         user_id: '123',
@@ -141,7 +140,7 @@ async function test_headers() {
         },
       },
     );
-    // console.log(result);
+    console.log(result);
   } catch (err) {
     assert('error');
   }

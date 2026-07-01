@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import fs from 'fs';
@@ -17,7 +16,7 @@ const fileBuffer = await fs.createReadStream(filePath);
 async function voiceClone() {
   const voiceObj = await client.audio.voices.clone({
     audio_format: 'mp3',
-    file: fileBuffer as any,
+    file: fileBuffer as unknown as File,
     voice_name: '湾湾小何2',
     preview_text:
       '今天天气真是太好了，阳光灿烂，心情超级棒，但是朋友最近的感情问题也让我心痛不已，好像世界末日一样，真的好为他难过。',
@@ -41,7 +40,7 @@ async function createSpeech() {
     console.warn(`Warning: Overwriting existing file at ${audioPath}`);
   }
 
-  await fs.writeFileSync(audioPath, speechBuffer as any, 'binary');
+  await fs.writeFileSync(audioPath, Buffer.from(speechBuffer), 'binary');
   console.log('Speech saved successfully:', audioPath);
 }
 
@@ -71,7 +70,7 @@ async function voiceTranslation() {
   // const fileBuffer = await fs.createReadStream(filePath);
 
   const voiceObj = await client.audio.transcriptions.create({
-    file: fileBuffer as any,
+    file: fileBuffer,
   });
   console.log('client.audio.transcriptions.create', voiceObj);
 }
