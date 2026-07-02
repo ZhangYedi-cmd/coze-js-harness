@@ -121,7 +121,7 @@
     "@tarojs/webpack5-runner": "4.0.7",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
-    "@types/mdast": "4.0.3",
+    "@types/mdast": "4.0.4",
     "@types/node": "^20",
     "@types/react": "^18.3.11",
     "@types/showdown": "^2.0.6",
