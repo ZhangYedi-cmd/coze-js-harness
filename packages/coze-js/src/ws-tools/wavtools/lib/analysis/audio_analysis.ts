@@ -56,7 +56,7 @@ export class AudioAnalysis {
   ): AudioAnalysisOutputType {
     if (!fftResult) {
       fftResult = new Float32Array(analyser.frequencyBinCount);
-      analyser.getFloatFrequencyData(fftResult);
+      analyser.getFloatFrequencyData(fftResult as Float32Array<ArrayBuffer>);
     }
     const nyquistFrequency = sampleRate / 2;
     const frequencyStep = (1 / fftResult.length) * nyquistFrequency;

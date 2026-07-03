@@ -212,7 +212,10 @@ export class APIClient {
         (response as unknown as Record<string, string>).header)['content-type'];
 
       if (isStream) {
-        if (contentType && contentType.includes('application/json')) {
+        if (
+          typeof contentType === 'string' &&
+          contentType.includes('application/json')
+        ) {
           const result = (await json()) as {
             code: number;
             msg: string;
@@ -230,7 +233,10 @@ export class APIClient {
         return stream() as Rsp;
       }
 
-      if (contentType && contentType.includes('application/json')) {
+      if (
+        typeof contentType === 'string' &&
+        contentType.includes('application/json')
+      ) {
         const result = (await json()) as { code: number; msg: string } & Record<
           string,
           unknown
