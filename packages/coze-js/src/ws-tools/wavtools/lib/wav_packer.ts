@@ -52,7 +52,7 @@ export class WavPacker {
    * @param {number} arg value to pack
    * @returns {Uint8Array}
    */
-  private _packData(size: 0 | 1, arg: number): Uint8Array {
+  private _packData(size: 0 | 1, arg: number): Uint8Array<ArrayBuffer> {
     return [
       new Uint8Array([arg, arg >> 8]),
       new Uint8Array([arg, arg >> 8, arg >> 16, arg >> 24]),
@@ -103,7 +103,7 @@ export class WavPacker {
       ), // Chunk length
       data,
     ];
-    const blob = new Blob(output, { type: 'audio/mpeg' });
+    const blob = new Blob(output as BlobPart[], { type: 'audio/mpeg' });
     const url = URL.createObjectURL(blob);
     return {
       blob,

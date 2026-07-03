@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from 'antd';
 import { WebsocketsEventType, type CreateChatData } from '@coze/api';
-import { type MessageInfo } from '@ant-design/x/es/useXChat';
+import { type MessageInfo } from '@ant-design/x/es/use-x-chat';
 import {
   Attachments,
   Bubble,

@@ -254,7 +254,7 @@ export function encodeG711A(pcmData: Int16Array) {
  * @param pcm16 - Int16Array of PCM samples
  * @returns {Uint8Array} G.711U encoded data
  */
-export function encodeG711U(pcm16: Int16Array): Uint8Array {
+export function encodeG711U(pcm16: Int16Array): Uint8Array<ArrayBuffer> {
   const BIAS = 0x84;
   const CLIP = 32635;
   const out = new Uint8Array(pcm16.length);
