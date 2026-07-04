@@ -125,7 +125,7 @@
     "@types/node": "^20",
     "@types/react": "^18.3.11",
     "@types/showdown": "^2.0.6",
-    "@types/webpack-env": "^1.13.6",
+    "@types/webpack-env": "^1.18.8",
     "@vitest/coverage-v8": "~2.1.9",
     "axios": "^1.17.0",
     "babel-loader": "^8.2.3",
