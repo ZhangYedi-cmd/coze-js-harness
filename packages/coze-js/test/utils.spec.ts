@@ -52,7 +52,11 @@ describe('mergeConfig', () => {
       },
     };
 
-    const result = mergeConfig(defaultConfig, userConfig, options);
+    const result = mergeConfig<Record<string, unknown>>(
+      defaultConfig,
+      userConfig,
+      options,
+    );
 
     expect(result).toEqual({
       baseURL: 'https://api.example.com',

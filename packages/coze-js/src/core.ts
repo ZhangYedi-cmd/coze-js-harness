@@ -34,6 +34,18 @@ export type RequestOptions = Omit<
   onApiError?: (error: APIError) => void;
 } & Record<string, unknown>;
 
+/**
+ * A file-like value accepted by upload endpoints across platforms:
+ * a browser File/Blob, a Node.js readable stream (e.g. fs.createReadStream),
+ * a local file path string, or a uni-app temp file descriptor.
+ */
+export type FileInput =
+  | File
+  | Blob
+  | NodeJS.ReadableStream
+  | string
+  | { filePath: string };
+
 export interface WebsocketOptions {
   WebSocket?: new (...args: unknown[]) => WebSocket; // WebSocket constructor, if none provided, defaults to global WebSocket
   maxReconnectionDelay?: number; // max delay in ms between reconnections
@@ -143,11 +155,11 @@ export class APIClient {
       headers['X-Coze-Client-User-Agent'] = getNodeClientUserAgent();
     }
 
-    const config = mergeConfig(
+    const config = mergeConfig<FetchAPIOptions>(
       this.axiosOptions,
       options,
       { headers },
-      { headers: this.headers || {} },
+      { headers: (this.headers || {}) as Record<string, string> },
     );
     config.method = method;
     config.data = body;
@@ -172,14 +184,14 @@ export class APIClient {
       headers['X-Coze-Client-User-Agent'] = getNodeClientUserAgent();
     }
 
-    const config = mergeConfig(
+    const config = mergeConfig<WebsocketOptions>(
       {
         debug: this._config.debug ?? false,
       },
       this._config.websocketOptions,
       options,
       { headers },
-      { headers: this.headers || {} },
+      { headers: (this.headers || {}) as Record<string, string> },
     );
 
     return config;

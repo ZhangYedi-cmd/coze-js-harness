@@ -1,7 +1,7 @@
 import { toFormData, type GenericFormData } from 'axios';
 
 import { APIResource } from '../resource';
-import { type RequestOptions } from '../../core';
+import { type RequestOptions, type FileInput } from '../../core';
 
 export class Files extends APIResource {
   /**
@@ -40,8 +40,7 @@ export class Files extends APIResource {
   }
 }
 export interface CreateFileReq {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  file: File | any;
+  file: FileInput;
 }
 
 export interface FileObject {

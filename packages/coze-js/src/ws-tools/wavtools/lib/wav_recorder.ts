@@ -20,6 +20,14 @@ interface AudioTrackConfig {
   [key: string]: unknown;
 }
 
+interface ExportEventPayload {
+  audio: {
+    bitsPerSample: number;
+    channels: Array<Float32Array>;
+    data: Int16Array | ArrayBuffer;
+  };
+}
+
 /**
  * Records live stream of user audio as PCM16 "audio/wav" data
  * @class
@@ -38,8 +46,7 @@ export class WavRecorder {
   analyser: AnalyserNode | null;
   recording: boolean;
   _lastEventId: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  eventReceipts: Record<number, any>;
+  eventReceipts: Record<number, unknown>;
   eventTimeout: number;
   _chunkProcessor: (data: { mono: ArrayBuffer; raw: ArrayBuffer }) => void;
   _chunkProcessorSize: number | undefined;
@@ -196,15 +203,15 @@ export class WavRecorder {
    * Sends an event to the AudioWorklet
    * @private
    * @param {string} name
-   * @param {{[key: string]: any}} data
+   * @param {Record<string, unknown>} data
    * @param {AudioWorkletNode} [_processor]
-   * @returns {Promise<{[key: string]: any}>}
+   * @returns {Promise<T>}
    */
-  private async _event(
+  private async _event<T = unknown>(
     name: string,
     data: Record<string, unknown> = {},
     _processor: AudioWorkletNode | null = null
-  ){
+  ): Promise<T> {
     _processor = _processor || this.processor;
     if (!_processor) {
       throw new Error('Can not send events without recording first');
@@ -224,7 +231,7 @@ export class WavRecorder {
     }
     const payload = this.eventReceipts[message.id];
     delete this.eventReceipts[message.id];
-    return payload;
+    return payload as T;
   }
 
   /**
@@ -530,7 +537,10 @@ export class WavRecorder {
       throw new Error('Session ended: please call .begin() first');
     }
     this.log('Reading ...');
-    const result = await this._event('read');
+    const result = await this._event<{
+      meanValues: Float32Array;
+      channels: Array<Float32Array>;
+    }>('read');
     return result;
   }
 
@@ -549,7 +559,7 @@ export class WavRecorder {
       );
     }
     this.log('Exporting ...');
-    const exportData = await this._event('export');
+    const exportData = await this._event<ExportEventPayload>('export');
     const packer = new WavPacker();
     const result = packer.pack(this.sampleRate, exportData.audio);
     return result;
@@ -573,7 +583,11 @@ export class WavRecorder {
     tracks.forEach((track) => track.stop());
 
     this.log('Exporting ...');
-    const exportData = await this._event('export', {}, _processor);
+    const exportData = await this._event<ExportEventPayload>(
+      'export',
+      {},
+      _processor
+    );
 
     this.processor.disconnect();
     this.source!.disconnect();

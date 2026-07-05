@@ -43,32 +43,41 @@ export function isPlainObject(obj: unknown): boolean {
   return proto === baseProto;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mergeConfig(...objects: any[]) {
-  return objects.reduce((result, obj) => {
-    if (obj === undefined) {
-      return result || {};
-    }
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        if (isPlainObject(obj[key]) && !Array.isArray(obj[key])) {
-          result[key] = mergeConfig(result[key] || {}, obj[key]);
-        } else {
-          result[key] = obj[key];
+export function mergeConfig<T extends object>(
+  ...objects: Array<T | Partial<T> | undefined>
+): T {
+  return (objects as Array<Record<string, unknown> | undefined>).reduce(
+    (result: Record<string, unknown>, obj) => {
+      if (obj === undefined) {
+        return result || {};
+      }
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          const value = obj[key];
+          if (isPlainObject(value) && !Array.isArray(value)) {
+            result[key] = mergeConfig<Record<string, unknown>>(
+              (result[key] as Record<string, unknown>) || {},
+              value as Record<string, unknown>,
+            );
+          } else {
+            result[key] = value;
+          }
         }
       }
-    }
-    return result;
-  }, {});
+      return result;
+    },
+    {},
+  ) as T;
 }
 
 export function isPersonalAccessToken(token?: string) {
   return !!token?.startsWith('pat_');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function buildWebsocketUrl(path: string, params?: Record<string, any>) {
-  const queryString = Object.entries(params || {})
+export function buildWebsocketUrl<T extends object>(path: string, params?: T) {
+  const queryString = Object.entries(
+    (params || {}) as Record<string, string | number | boolean | undefined | null>,
+  )
     .filter(
       ([_, value]) => value !== undefined && value !== null && value !== '',
     )
