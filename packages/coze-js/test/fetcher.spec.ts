@@ -1,5 +1,5 @@
 import nodeFetch from 'node-fetch';
-import axios from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 
 import { fetchAPI, adapterFetch } from '../src/fetcher';
 import { TimeoutError, APIUserAbortError, CozeError } from '../src/error';
@@ -283,7 +283,9 @@ describe('adapterFetch', () => {
       headers: { 'Content-Type': 'application/json' },
     };
 
-    const result = await adapterFetch(options);
+    const result = await adapterFetch(
+      options as unknown as InternalAxiosRequestConfig,
+    );
 
     expect(mockedFetch).toHaveBeenCalledWith(options.url, {
       data: options.data,

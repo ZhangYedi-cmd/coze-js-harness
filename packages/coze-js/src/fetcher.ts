@@ -5,6 +5,7 @@ import axios, {
   type AxiosResponse,
   type AxiosInstance,
   type AxiosStatic,
+  type InternalAxiosRequestConfig,
 } from 'axios';
 
 import { isBrowser, isBrowserExtension, isUniApp } from './utils';
@@ -69,16 +70,25 @@ const handleError = (error: unknown) => {
 };
 
 // node-fetch is used for streaming requests
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const adapterFetch = async (options: any): Promise<any> => {
-  const response = await fetch(options.url, {
+// The returned shape intentionally exposes a readable stream via `data`
+// instead of a fully-populated AxiosResponse, since it is only ever
+// consumed by fetchAPI()'s own streaming code path.
+export const adapterFetch = async (
+  options: InternalAxiosRequestConfig,
+): Promise<AxiosResponse> => {
+  const fetchInit = {
     body: options.data,
     ...options,
-  });
-  return {
+  };
+  const response = await fetch(
+    options.url as string,
+    fetchInit as Parameters<typeof fetch>[1],
+  );
+  const adaptedResponse = {
     data: response.body,
     ...response,
   };
+  return adaptedResponse as unknown as AxiosResponse;
 };
 
 const isSupportNativeFetch = () => {
