@@ -122,14 +122,12 @@ const SettingForm: React.FC<SettingsProps> = ({ onCancel, onOk }) => {
   );
 
   /* eslint-disable max-params */
-  const loadData = async (
+  const loadData = async <T extends { value: string }>(
     objectName: string,
     dataLocalKey: string,
     setLoading: (loading: boolean) => void,
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    setData: (data: any[]) => void,
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    fetchData: (id?: string) => Promise<any[]>,
+    setData: (data: T[]) => void,
+    fetchData: (id?: string) => Promise<T[]>,
     parentId?: string,
   ): Promise<void> => {
     setLoading(true);

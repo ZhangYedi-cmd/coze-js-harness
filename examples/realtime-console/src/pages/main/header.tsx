@@ -20,9 +20,33 @@ import useCozeAPI from '../../hooks/use-coze-api';
 import MessageForm, { type MessageFormRef } from './message-form';
 import LiveInfo from './live-info';
 import HoldToTalk from './hold-to-talk';
-import ComfortStrategyForm from './comfort-strategy-form';
+import ComfortStrategyForm, {
+  type ComfortStrategyValues,
+  type ComfortStrategyEventData,
+} from './comfort-strategy-form';
 
 const { Text, Link } = Typography;
+
+interface ConversationChatRequiresActionEvent {
+  data?: {
+    id?: string;
+    required_action?: {
+      submit_tool_outputs?: {
+        tool_calls?: Array<{
+          id?: string;
+          type?: string;
+          function?: unknown;
+        }>;
+      };
+    };
+  };
+}
+
+interface LiveCreatedEvent {
+  data?: {
+    live_id?: string;
+  };
+}
 
 interface HeaderProps {
   onConnect: () => Promise<void>;
@@ -144,8 +168,8 @@ const Header: React.FC<HeaderProps> = ({
       return;
     }
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const onMessage = (event: string, data: any) => {
+    const onMessage = (_eventName: string, rawData: unknown) => {
+      const data = rawData as ConversationChatRequiresActionEvent;
       const type =
         data?.data?.required_action?.submit_tool_outputs?.tool_calls?.[0]?.type;
       if (type === 'reply_message') {
@@ -189,11 +213,15 @@ const Header: React.FC<HeaderProps> = ({
     });
 
     // 订阅 LIVE_CREATED 事件,获取 live_id
-    clientRef.current.on(EventNames.LIVE_CREATED, (_: string, event: any) => {
-      if (event?.data?.live_id) {
-        setLiveId(event.data.live_id);
-      }
-    });
+    clientRef.current.on(
+      EventNames.LIVE_CREATED,
+      (_eventName: string, rawEvent: unknown) => {
+        const event = rawEvent as LiveCreatedEvent;
+        if (event?.data?.live_id) {
+          setLiveId(event.data.live_id);
+        }
+      },
+    );
 
     return () => {
       try {
@@ -302,11 +330,11 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const handleComfortStrategySubmit = async (
-    values: any,
-    callback?: (values: any) => void,
+    values: ComfortStrategyValues,
+    callback?: (values: ComfortStrategyEventData) => void,
   ) => {
     let fileId;
-    if (values.comfortStrategy === 'audio') {
+    if (values.comfortStrategy === 'audio' && values.audioFile) {
       try {
         const res = await uploadFile(values.audioFile.file);
         fileId = res?.id;

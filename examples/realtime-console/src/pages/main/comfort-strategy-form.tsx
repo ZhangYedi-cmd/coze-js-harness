@@ -14,11 +14,39 @@ import { UploadOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
 
+export interface ComfortStrategyValues {
+  comfortStrategy: 'audio' | 'text' | 'bot';
+  audioFile?: { file: File };
+  fixedText?: string;
+  botId?: string;
+  triggerStrategy: string;
+  triggerInterval?: number;
+}
+
+export interface ComfortStrategyEventData {
+  id: string;
+  event_type: string;
+  data: {
+    pre_answer: {
+      type: string;
+      file_id?: string;
+      pre_answer_list?: string[];
+      bot_id?: string;
+    };
+    trigger: {
+      type: string;
+      time_after?: number;
+    };
+  };
+}
+
 interface ComfortStrategyFormProps {
   visible: boolean;
   onClose: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSubmit: (values: any, callback?: (values: any) => void) => void;
+  onSubmit: (
+    values: ComfortStrategyValues,
+    callback?: (values: ComfortStrategyEventData) => void,
+  ) => void;
 }
 
 const ComfortStrategyForm: React.FC<ComfortStrategyFormProps> = ({
