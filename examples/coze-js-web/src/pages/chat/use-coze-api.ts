@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 
 import {
   CozeAPI,
+  RoleType,
   getWebOAuthToken,
   getPKCEOAuthToken,
   getWebAuthenticationUrl,
   getPKCEAuthenticationUrl,
+  type EnterMessage,
   type OAuthToken,
 } from '@coze/api';
 
@@ -127,12 +129,11 @@ const useCozeAPI = () => {
   }
 
   async function streamingChat(query: string) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let messages: any[];
+    let messages: EnterMessage[];
     if (fileId) {
       messages = [
         {
-          role: 'user',
+          role: RoleType.User,
           content: [
             { type: 'file', file_id: fileId },
             { type: 'text', text: query },
@@ -143,7 +144,7 @@ const useCozeAPI = () => {
     } else {
       messages = [
         {
-          role: 'user',
+          role: RoleType.User,
           content: query,
           content_type: 'text',
         },

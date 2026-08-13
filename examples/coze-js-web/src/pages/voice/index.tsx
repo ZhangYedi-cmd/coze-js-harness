@@ -54,8 +54,7 @@ const Voice = () => {
   }, []);
 
   // handle settings save
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSettingsSave = (values: any) => {
+  const handleSettingsSave = (values: Record<string, string>) => {
     Object.entries(values).forEach(([key, value]) => {
       localStorage.setItem(`voice_${key}`, value as string);
     });
@@ -80,8 +79,7 @@ const Voice = () => {
   };
 
   // handle file upload
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleFileUpload = async (info: any) => {
+  const handleFileUpload = async (info: { file: { originFileObj?: File } }) => {
     const file = info.file.originFileObj;
     if (file) {
       try {
