@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { UniAppWebSocket } from './index';
 
 // 获取适当的WebSocket实现的工厂函数
@@ -14,7 +13,7 @@ export function getWebSocketImplementation(): typeof WebSocket {
   // 根据平台选择适当的实现
   if (systemInfo.uniPlatform === 'web' || systemInfo.uniPlatform === 'h5') {
     // 对于H5，我们可以使用浏览器原生的WebSocket
-    return window.WebSocket as any;
+    return window.WebSocket;
   } else {
     // 对于其他平台，使用默认的UniApp实现
     return UniAppWebSocket;
