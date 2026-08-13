@@ -40,12 +40,22 @@ import { ConsoleLog } from './console-log';
 const { Content, Footer } = Layout;
 const { Text } = Typography;
 
+interface RealtimeEventPayload {
+  event_type?: string;
+  data?: {
+    role?: string;
+    content?: string;
+    [key: string]: unknown;
+  };
+  transcriptData?: string;
+  translationData?: string;
+}
+
 interface EventData {
   time: string;
   type?: string;
   event: string;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  data?: any;
+  data?: RealtimeEventPayload;
 }
 
 const RealtimeConsole: React.FC = () => {
@@ -190,57 +200,69 @@ const RealtimeConsole: React.FC = () => {
     }
   };
 
-  const handleAllMessage = useCallback((eventName: string, data: any) => {
-    // console.log('event', eventName, data);
+  const handleAllMessage = useCallback(
+    (eventName: string, rawData: unknown) => {
+      // console.log('event', eventName, data);
+      const data = rawData as RealtimeEventPayload;
 
-    if (
-      eventName === EventNames.PLAYER_EVENT ||
-      eventName === EventNames.NETWORK_QUALITY
-    ) {
-      return;
-    }
+      if (
+        eventName === EventNames.PLAYER_EVENT ||
+        eventName === EventNames.NETWORK_QUALITY
+      ) {
+        return;
+      }
 
-    // handle interrupt message
-    // handleMessage(eventName);
+      // handle interrupt message
+      // handleMessage(eventName);
 
-    const now = new Date();
-    const time = `${now.toTimeString().split(' ')[0]}.${String(
-      now.getMilliseconds(),
-    ).padStart(3, '0')}`;
-    const type = eventName.split('.')[0]; // server or client
-    const event = eventName.substring(eventName.indexOf('.') + 1); // event name
+      const now = new Date();
+      const time = `${now.toTimeString().split(' ')[0]}.${String(
+        now.getMilliseconds(),
+      ).padStart(3, '0')}`;
+      const type = eventName.split('.')[0]; // server or client
+      const event = eventName.substring(eventName.indexOf('.') + 1); // event name
 
-    setEvents(prevEvents => [...prevEvents.slice(-200), { time, type, event }]);
+      setEvents(prevEvents => [
+        ...prevEvents.slice(-200),
+        { time, type, event },
+      ]);
 
-    if (
-      type === 'server' &&
-      (data?.data?.role === 'user' ||
-        data?.data?.role === 'assistant' ||
-        data?.event_type === 'conversation.created' ||
-        data?.event_type === 'conversation.chat.failed' ||
-        data?.event_type === 'conversation.audio_transcript.delta' ||
-        data?.event_type === 'conversation.audio_translation.delta' ||
-        data?.event_type === 'error')
-    ) {
-      setServerEvents(prevEvents => {
-        const mergedEvent = mergeEvent(prevEvents, { time, event, data });
-        if (mergedEvent) {
-          return [...prevEvents.slice(0, -1), mergedEvent];
-        }
-        if (
-          data?.event_type === 'error' ||
+      if (
+        type === 'server' &&
+        (data?.data?.role === 'user' ||
+          data?.data?.role === 'assistant' ||
           data?.event_type === 'conversation.created' ||
-          data?.event_type === 'conversation.chat.failed'
-        ) {
-          data.data.content = JSON.stringify(data.data);
-          data.data.role = 'assistant';
-        }
-        return [...prevEvents.slice(-200), { time, event, data }];
-      });
-    }
-  }, []);
+          data?.event_type === 'conversation.chat.failed' ||
+          data?.event_type === 'conversation.audio_transcript.delta' ||
+          data?.event_type === 'conversation.audio_translation.delta' ||
+          data?.event_type === 'error')
+      ) {
+        setServerEvents(prevEvents => {
+          const mergedEvent = mergeEvent(prevEvents, { time, event, data });
+          if (mergedEvent) {
+            return [...prevEvents.slice(0, -1), mergedEvent];
+          }
+          if (
+            data?.event_type === 'error' ||
+            data?.event_type === 'conversation.created' ||
+            data?.event_type === 'conversation.chat.failed'
+          ) {
+            if (data.data) {
+              data.data.content = JSON.stringify(data.data);
+              data.data.role = 'assistant';
+            }
+          }
+          return [...prevEvents.slice(-200), { time, event, data }];
+        });
+      }
+    },
+    [],
+  );
 
-  const mergeEvent = (prevEvents: any[], event: any) => {
+  const mergeEvent = (
+    prevEvents: EventData[],
+    event: EventData,
+  ): EventData | null => {
     if (prevEvents.length === 0) {
       return null;
     }
@@ -255,8 +277,10 @@ const RealtimeConsole: React.FC = () => {
         data: {
           ...lastEvent.data,
           data: {
-            ...lastEvent.data.data,
-            content: lastEvent.data.data.content + event.data.data.content,
+            ...lastEvent.data?.data,
+            content:
+              (lastEvent.data?.data?.content ?? '') +
+              (event.data?.data?.content ?? ''),
           },
         },
       };
@@ -291,11 +315,11 @@ const RealtimeConsole: React.FC = () => {
           // Store both transcript and translation data
           transcriptData:
             lastEvent.event === 'conversation.audio_transcript.delta'
-              ? lastEvent.data.data.content
+              ? lastEvent.data?.data?.content
               : lastEvent.data?.transcriptData || '',
           translationData:
             lastEvent.event === 'conversation.audio_translation.delta'
-              ? lastEvent.data.data.content
+              ? lastEvent.data?.data?.content
               : lastEvent.data?.translationData || '',
           data: {
             role: 'assistant',
@@ -306,9 +330,9 @@ const RealtimeConsole: React.FC = () => {
 
       // Update the appropriate field based on current event type
       if (event.event === 'conversation.audio_transcript.delta') {
-        combinedEvent.data.transcriptData = event.data.data.content;
+        combinedEvent.data.transcriptData = event.data?.data?.content;
       } else if (event.event === 'conversation.audio_translation.delta') {
-        combinedEvent.data.translationData = event.data.data.content;
+        combinedEvent.data.translationData = event.data?.data?.content;
       }
 
       return combinedEvent;

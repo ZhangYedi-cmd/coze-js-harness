@@ -124,9 +124,9 @@ const useNetworkError = ({
           setConnectStatus('connecting');
           break;
         case EventNames.NETWORK_QUALITY: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const uplinkNetworkQuality = (data as any)
-            .uplinkNetworkQuality as NetworkQuality;
+          const { uplinkNetworkQuality } = data as {
+            uplinkNetworkQuality: NetworkQuality;
+          };
 
           handleNetworkQuality(uplinkNetworkQuality);
           handleIceState(uplinkNetworkQuality);
