@@ -13,6 +13,7 @@
 | [@coze/realtime-api](./packages/realtime-api) | 实时语音 SDK | [![npm](https://img.shields.io/npm/v/@coze/realtime-api.svg)](https://www.npmjs.com/package/@coze/realtime-api) |
 | [@coze/taro-api](./packages/coze-taro) | 支持 Taro 小程序的 Coze API SDK | [![npm](https://img.shields.io/npm/v/@coze/taro-api.svg)](https://www.npmjs.com/package/@coze/taro-api) |
 | [@coze/uniapp-api](./packages/coze-uniapp) | 支持 UniApp 小程序的 Coze API SDK | [![npm](https://img.shields.io/npm/v/@coze/uniapp-api.svg)](https://www.npmjs.com/package/@coze/uniapp-api) |
+| [@coze/chat-sdk](./packages/chat-sdk) | 支持 Taro 和 Web 的 Coze 聊天组件 SDK | [![npm](https://img.shields.io/npm/v/@coze/chat-sdk.svg)](https://www.npmjs.com/package/@coze/chat-sdk) |
 ## 🎮 示例
 
 在 [examples](./examples) 目录中查找每个包的使用示例：
